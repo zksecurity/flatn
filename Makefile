@@ -79,7 +79,7 @@ flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS
 	   && make -j16
 
 	# copy the binary and the library
-	cp flatter-tmp/build/bin/flatter .
+	cp flatter-tmp/build/bin/flatter flatter-darwin
 	cp flatter-tmp/build/lib/libflatter.dylib .
 
 	# a quick test
@@ -100,7 +100,7 @@ flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mp
        && make -j16
 
 	# copy the binary and the library
-	cp flatter-tmp/build/bin/flatter .
+	cp flatter-tmp/build/bin/flatter flatter-linux
 	cp flatter-tmp/build/lib/libflatter.so .
 
  	# a quick test

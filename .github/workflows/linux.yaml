@@ -20,7 +20,7 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install build wheel setuptools
-          python setup.py bdist_wheel --plat-name=linux_x86_64
+          python setup.py bdist_wheel
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v3
@@ -32,6 +32,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Download wheel artifact
         uses: actions/download-artifact@v3
         with:
@@ -43,4 +45,4 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install dist/*.whl
-          # Add your test commands here
+          python ./tests.py

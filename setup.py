@@ -77,7 +77,9 @@ setup(
     name=PACKAGE,
     version="0.1.0",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        "pkg_resources",
+    ],
     zip_safe=False,
     package_data={
         PACKAGE: ['bin/*'],

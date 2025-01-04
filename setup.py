@@ -27,7 +27,7 @@ def build_binary():
         shutil.copy2('flatter-darwin', binary)
         shutil.copy2('libflatter.dylib', binary)
 
-    if sys.platform == 'linux':
+    elif sys.platform == 'linux':
         subprocess.run(['make', 'flatter-linux', 'libflatter.so']).check_returncode()
 
         # clean

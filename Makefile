@@ -1,7 +1,5 @@
 LIBS = $(PWD)/libs
 
-all: flatter libflatter.dylib
-
 gmp-6.3.0.tar.xz:
 	wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
 

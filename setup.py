@@ -1,12 +1,11 @@
 from setuptools import setup, find_packages
-from setuptools.command.build_ext import build_ext
 
-import subprocess
-import sys
 import os
+import sys
 import shutil
+import subprocess
 
-PACKAGE = 'flattery'
+PACKAGE = 'pyflatter'
 
 def build_binary():
     # if on MacOS, build the dylib
@@ -15,14 +14,18 @@ def build_binary():
 
         # clean
         root = os.path.join(os.getcwd(), PACKAGE)
+        assert os.path.exists(root)
         binary = os.path.join(root, 'bin')
         shutil.rmtree(binary)
         os.mkdir(binary)
 
         # copy flatter to PACKAGE/bin
         # copy libflatter.dylib to PACKAGE/bin
-        shutil.copy2('flatter', os.path.join(binary, 'flatter'))
-        shutil.copy2('libflatter.dylib', os.path.join(binary, 'libflatter.dylib'))
+        shutil.copy2('flatter', binary)
+        shutil.copy2('libflatter.dylib', binary)
+
+    if sys.platform == 'linux':
+        raise NotImplementedError("This build script is only supported on MacOS and Linux")
 
     else:
         # die
@@ -31,12 +34,12 @@ def build_binary():
 build_binary()
 
 setup(
-    name="flattery",
+    name=PACKAGE,
     version="0.1.0",
     packages=find_packages(),
     install_requires=[],
     zip_safe=False,
     package_data={
-        'flattery': ['bin/']
+        PACKAGE: ['bin/']
     },
 )

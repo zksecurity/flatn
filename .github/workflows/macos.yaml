@@ -1,0 +1,21 @@
+name: Build flatn
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew install make wget cmake
+          brew install libomp
+
+      - name: Build flatter
+        run: make all

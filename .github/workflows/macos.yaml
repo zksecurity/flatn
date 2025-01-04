@@ -1,10 +1,8 @@
-name: Build flatn
+name: Build Wheel on macOS
 
 on:
   push:
-    branches: ["main"]
   pull_request:
-    branches: ["main"]
 
 jobs:
   build:

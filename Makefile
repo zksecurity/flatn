@@ -83,7 +83,7 @@ flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS
 	cp flatter-tmp/build/lib/libflatter.dylib .
 
 	# a quick test
-	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter-darwin
 
 flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	rm -rf flatter-tmp
@@ -104,7 +104,7 @@ flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mp
 	cp flatter-tmp/build/lib/libflatter.so .
 
  	# a quick test
-	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
 
 clean:
 	rm -rf libs

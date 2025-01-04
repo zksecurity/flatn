@@ -10,7 +10,7 @@ PACKAGE = 'pyflatter'
 def build_binary():
     # if on MacOS, build the dylib
     if sys.platform == 'darwin':
-        subprocess.run(['make', 'flatter-darwin', 'libflatter.dylib'])
+        subprocess.run(['make', 'flatter-darwin', 'libflatter.dylib']).check_returncode()
 
         # clean
         root = os.path.join(os.getcwd(), PACKAGE)
@@ -28,7 +28,7 @@ def build_binary():
         shutil.copy2('libflatter.dylib', binary)
 
     if sys.platform == 'linux':
-        subprocess.run(['make', 'flatter-linux', 'libflatter.so'])
+        subprocess.run(['make', 'flatter-linux', 'libflatter.so']).check_returncode()
 
         # clean
         print(os.getcwd())

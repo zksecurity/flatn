@@ -76,7 +76,7 @@ flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS
 			-DOpenMP_omp_LIBRARY="/opt/homebrew/opt/libomp/lib/libomp.dylib" \
 			-DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
 			-DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include" \
-		&& make -j16
+	   && make -j16
 
 	# copy the binary and the library
 	cp flatter-tmp/build/bin/flatter .
@@ -86,25 +86,25 @@ flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter
 
 flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
- rm -rf flatter-tmp
- mkdir flatter-tmp
- tar -xf flatter.tar.gz -C flatter-tmp --strip-components 1
- cd flatter-tmp \
-    && mkdir build \
-    && cd build \
-    && CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
+	rm -rf flatter-tmp
+	mkdir flatter-tmp
+	tar -xf flatter.tar.gz -C flatter-tmp --strip-components 1
+	cd flatter-tmp \
+	   && mkdir build \
+       && cd build \
+       && CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
           CMAKE_LIBRARY_PATH=$(LIBS)/gmp/lib:$(LIBS)/mpfr/lib:$(LIBS)/fplll/lib \
-            cmake .. \
-   -DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
-   -DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
-  && make -j16
+          cmake .. \
+            -DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
+            -DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
+       && make -j16
 
- # copy the binary and the library
- cp flatter-tmp/build/bin/flatter .
- cp flatter-tmp/build/lib/libflatter.so .
+	# copy the binary and the library
+	cp flatter-tmp/build/bin/flatter .
+	cp flatter-tmp/build/lib/libflatter.so .
 
- # a quick test
- echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter
+ 	# a quick test
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter
 
 clean:
 	rm -rf libs

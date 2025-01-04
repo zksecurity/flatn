@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+from wheel.bdist_wheel import bdist_wheel
+
 import os
 import sys
 import shutil
@@ -52,6 +54,25 @@ def build_binary():
 
 build_binary()
 
+
+
+class CustomBdistWheel(bdist_wheel):
+    def finalize_options(self):
+        bdist_wheel.finalize_options(self)
+        # Mark this as platform specific
+        self.root_is_pure = False
+
+    def get_tag(self):
+        # Override platform tag
+        python_tag, abi_tag, platform_tag = bdist_wheel.get_tag(self)
+        # For macOS arm64:
+        # platform_tag = 'macosx_11_0_arm64'
+        # For macOS x86_64:
+        # platform_tag = 'macosx_10_9_x86_64'
+        # For Linux:
+        # platform_tag = 'linux_x86_64'
+        return python_tag, abi_tag, platform_tag
+
 setup(
     name=PACKAGE,
     version="0.1.0",
@@ -59,6 +80,9 @@ setup(
     install_requires=[],
     zip_safe=False,
     package_data={
-        PACKAGE: ['bin/']
+        PACKAGE: ['bin/*'],
+    },
+    cmdclass={
+        'bdist_wheel': CustomBdistWheel,
     },
 )

@@ -7,3 +7,5 @@ openmp-*/
 *.dylib
 build/
 flatter
+flatter-*
+*/__pycache__/

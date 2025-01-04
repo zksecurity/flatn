@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential wget xz-utils make cmake libomp-dev libeigen3-dev
+          sudo apt install -y build-essential wget m4 xz-utils make cmake libomp-dev libeigen3-dev
 
       - name: Build wheel
         run: |

@@ -44,4 +44,4 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install dist/*.whl
-          # Add your test commands here
+          python ./tests.py

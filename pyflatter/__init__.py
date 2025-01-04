@@ -6,21 +6,21 @@ import pkg_resources
 PACKAGE = 'pyflatter'
 
 # get file path
-path_bin = pkg_resources.resource_filename(PACKAGE, 'bin')
+__path_bin = pkg_resources.resource_filename(PACKAGE, 'bin')
 
 if sys.platform == 'darwin':
-    path_flatter = os.path.join(path_bin, 'flatter-darwin')
-    path_dylib = os.path.join(path_bin, 'libflatter.dylib')
+    __path_flatter = os.path.join(__path_bin, 'flatter-darwin')
+    __path_dylib = os.path.join(__path_bin, 'libflatter.dylib')
 elif sys.platform == 'linux':
-    path_flatter = os.path.join(path_bin, 'flatter-linux')
-    path_dylib = os.path.join(path_bin, 'libflatter.so')
+    __path_flatter = os.path.join(__path_bin, 'flatter-linux')
+    __path_dylib = os.path.join(__path_bin, 'libflatter.so')
 else:
     raise NotImplementedError("This build script is only supported on MacOS and Linux")
 
 # sanity: check if the file exists
-assert os.path.exists(path_bin)
-assert os.path.exists(path_flatter)
-assert os.path.exists(path_dylib)
+assert os.path.exists(__path_bin), f"Path {__path_bin} does not exist"
+assert os.path.exists(__path_flatter), f"Path {__path_flatter} does not exist"
+assert os.path.exists(__path_dylib), f"Path {__path_dylib} does not exist"
 
 def flatter(
     lattice,
@@ -48,7 +48,7 @@ def flatter(
     """
 
     args = [
-        'flatter',
+        __path_flatter,
     ]
 
     if verbose:
@@ -70,15 +70,15 @@ def flatter(
         args += ['-l', f'{logcond}']
 
     # sanity check: all rows should have the same length
-    assert len(lattice) < 2, "Lattice should have at least 2 rows"
+    assert len(lattice) >= 2, "Lattice should have at least 2 rows"
     assert all(len(row) == len(lattice[0]) for row in lattice)
 
     # if we are on MacOS add libflatter.dylib to DYLD_LIBRARY_PATH
     env = {}
     if sys.platform == 'darwin':
-        env['DYLD_LIBRARY_PATH'] = path_dylib
+        env['DYLD_LIBRARY_PATH'] = __path_dylib
     elif sys.platform == 'linux':
-        env['LD_PRELOAD'] = path_dylib
+        env['LD_PRELOAD'] = __path_dylib
     else:
         raise NotImplementedError("This build script is only supported on MacOS and Linux")
 
@@ -124,6 +124,7 @@ def flatter(
     first_line = True
     last_line = False
     for line in proc.stdout:
+        line = line.strip()
         assert not last_line
         if first_line:
             assert line.startswith('[[')
@@ -141,7 +142,7 @@ def flatter(
     assert proc.wait() == 0, f"flatter failed with exit code {proc.returncode}"
 
     # sanity check: all rows should have the same length
-    assert len(rows) < 2, "Lattice should have at least 2 rows"
+    assert len(rows) >= 2, "Lattice should have at least 2 rows"
     assert all(len(row) == len(rows[0]) for row in rows)
     return rows
 

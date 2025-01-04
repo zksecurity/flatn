@@ -24,17 +24,17 @@ $(LIBS)/omp: openmp-19.1.6.src.tar.xz
        && mkdir build \
        && cd build \
        && cmake .. \
-       && make -j16
+       && make -j
 	rm -rf openmp-19.1.6.src
 
-#&& make check \ # todo: takes a while
 $(LIBS)/gmp: gmp-6.3.0.tar.xz
 	rm -rf gmp-6.3.0
 	tar -xf gmp-6.3.0.tar.xz
 	mkdir -p $(LIBS)
 	cd gmp-6.3.0 \
 	   && ./configure --prefix $(LIBS)/gmp \
-	   && make -j16 \
+	   && make -j \
+	   && make -j check \
 	   && make install
 	rm -rf gmp-6.3.0
 
@@ -44,8 +44,8 @@ $(LIBS)/mpfr: mpfr-4.2.1.tar.gz $(LIBS)/gmp
 	mkdir -p $(LIBS)
 	cd mpfr-4.2.1 \
 	   && ./configure --with-gmp=$(LIBS)/gmp --prefix $(LIBS)/mpfr \
-	   && make -j16 \
-	   && make check \
+	   && make -j \
+	   && make -j check \
 	   && make install
 	rm -rf mpfr-4.2.1
 
@@ -54,8 +54,8 @@ $(LIBS)/fplll: fplll-5.3.2.tar.gz $(LIBS)/gmp $(LIBS)/mpfr
 	tar -xf fplll-5.3.2.tar.gz
 	cd fplll-5.3.2 \
 	   && ./configure --with-gmp=$(LIBS)/gmp --with-mpfr=$(LIBS)/mpfr --prefix $(LIBS)/fplll \
-	   && make -j16 \
-	   && make check \
+	   && make -j \
+	   && make -j check \
 	   && make install
 	rm -rf fplll-5.3.2
 
@@ -74,7 +74,7 @@ flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS
 			-DOpenMP_omp_LIBRARY="/opt/homebrew/opt/libomp/lib/libomp.dylib" \
 			-DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
 			-DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include" \
-	   && make -j16
+	   && make -j
 
 	# copy the binary and the library
 	cp flatter-tmp/build/bin/flatter flatter-darwin
@@ -95,7 +95,7 @@ flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mp
           cmake .. \
             -DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
             -DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
-       && make -j16
+       && make -j
 
 	# copy the binary and the library
 	cp flatter-tmp/build/bin/flatter flatter-linux

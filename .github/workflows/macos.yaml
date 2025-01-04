@@ -14,6 +14,35 @@ jobs:
         run: |
           brew install make wget cmake
           brew install libomp
+          brew install eigen
 
-      - name: Build flatter
-        run: make all
+      - name: Build wheel
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install build wheel setuptools
+          python setup.py bdist_wheel --plat-name=macosx_arm64
+          rm -rf .venv
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel
+          path: dist/*.whl
+
+  test:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: wheel
+          path: dist
+
+      - name: Test the package
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install dist/*.whl
+          # Add your test commands here

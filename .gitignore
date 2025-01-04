@@ -1,0 +1,9 @@
+dist/
+flatter-tmp/
+*.egg-info/
+flatter*/
+libs/
+openmp-*/
+*.dylib
+build/
+flatter

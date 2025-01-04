@@ -81,10 +81,9 @@ flatter libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
 	# copy the binary and the library
 	cp flatter-tmp/build/bin/flatter .
 	cp flatter-tmp/build/lib/libflatter.dylib .
-	rm -rf flatter-tmp
 
 	# a quick test
-	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. DYLD_LIBRARY_PATH=. ./flatter
 
 clean:
 	rm -rf libs

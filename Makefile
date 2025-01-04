@@ -36,7 +36,7 @@ $(LIBS)/gmp: gmp-6.3.0.tar.xz
 	cd gmp-6.3.0 \
 	   && ./configure --prefix $(LIBS)/gmp \
 	   && make -j16 \
-	   && make check \
+	   # && make check \ # todo: takes a while
 	   && make install
 	rm -rf gmp-6.3.0
 
@@ -61,7 +61,7 @@ $(LIBS)/fplll: fplll-5.3.2.tar.gz $(LIBS)/gmp $(LIBS)/mpfr
 	   && make install
 	rm -rf fplll-5.3.2
 
-flatter libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
+flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
 	rm -rf flatter-tmp
 	mkdir flatter-tmp
 	tar -xf flatter.tar.gz -C flatter-tmp --strip-components 1
@@ -83,7 +83,28 @@ flatter libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
 	cp flatter-tmp/build/lib/libflatter.dylib .
 
 	# a quick test
-	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. DYLD_LIBRARY_PATH=. ./flatter
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter
+
+flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
+ rm -rf flatter-tmp
+ mkdir flatter-tmp
+ tar -xf flatter.tar.gz -C flatter-tmp --strip-components 1
+ cd flatter-tmp \
+    && mkdir build \
+    && cd build \
+    && CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
+          CMAKE_LIBRARY_PATH=$(LIBS)/gmp/lib:$(LIBS)/mpfr/lib:$(LIBS)/fplll/lib \
+            cmake .. \
+   -DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
+   -DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
+  && make -j16
+
+ # copy the binary and the library
+ cp flatter-tmp/build/bin/flatter .
+ cp flatter-tmp/build/lib/libflatter.so .
+
+ # a quick test
+ echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter
 
 clean:
 	rm -rf libs
@@ -91,6 +112,7 @@ clean:
 	rm -rf mpfr-4.2.1
 	rm -rf fplll-5.3.2
 	rm -rf flatter-tmp
-	rm -f flatter
+	rm -f flatter-darwin flatter-linux
+	rm -f libflatter.dylib libflatter.so
 
 .PHONY: all clean

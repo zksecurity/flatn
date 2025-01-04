@@ -10,9 +10,10 @@ PACKAGE = 'pyflatter'
 def build_binary():
     # if on MacOS, build the dylib
     if sys.platform == 'darwin':
-        subprocess.run(['make', 'flatter', 'libflatter.dylib'])
+        subprocess.run(['make', 'flatter-darwin', 'libflatter.dylib'])
 
         # clean
+        print(os.getcwd())
         root = os.path.join(os.getcwd(), PACKAGE)
         assert os.path.exists(root)
         binary = os.path.join(root, 'bin')
@@ -21,11 +22,24 @@ def build_binary():
 
         # copy flatter to PACKAGE/bin
         # copy libflatter.dylib to PACKAGE/bin
-        shutil.copy2('flatter', binary)
+        shutil.copy2('flatter-darwin', binary)
         shutil.copy2('libflatter.dylib', binary)
 
     if sys.platform == 'linux':
-        raise NotImplementedError("This build script is only supported on MacOS and Linux")
+        subprocess.run(['make', 'flatter-linux', 'libflatter.so'])
+
+        # clean
+        print(os.getcwd())
+        root = os.path.join(os.getcwd(), PACKAGE)
+        assert os.path.exists(root)
+        binary = os.path.join(root, 'bin')
+        shutil.rmtree(binary)
+        os.mkdir(binary)
+
+        # copy flatter to PACKAGE/bin
+        # copy libflatter.so to PACKAGE/bin
+        shutil.copy2('flatter-linux', binary)
+        shutil.copy2('libflatter.so', binary)
 
     else:
         # die

@@ -9,10 +9,10 @@ PACKAGE = 'pyflatter'
 path_bin = pkg_resources.resource_filename(PACKAGE, 'bin')
 
 if sys.platform == 'darwin':
-    path_flatter = os.path.join(path_bin, 'flatter')
+    path_flatter = os.path.join(path_bin, 'flatter-darwin')
     path_dylib = os.path.join(path_bin, 'libflatter.dylib')
 elif sys.platform == 'linux':
-    path_flatter = os.path.join(path_bin, 'flatter')
+    path_flatter = os.path.join(path_bin, 'flatter-linux')
     path_dylib = os.path.join(path_bin, 'libflatter.so')
 else:
     raise NotImplementedError("This build script is only supported on MacOS and Linux")

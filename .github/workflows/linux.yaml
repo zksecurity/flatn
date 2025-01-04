@@ -1,4 +1,4 @@
-name: Build Wheel on macOS
+name: Build Wheel on Linux
 
 on:
   push:
@@ -6,22 +6,22 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
-          brew install make wget cmake
-          brew install libomp
-          brew install eigen
+          sudo apt-get update
+          sudo apt-get install -y build-essential wget cmake libomp-dev
+          sudo apt-get install -y libeigen3-dev
 
       - name: Build wheel
         run: |
           python -m venv .venv
           source .venv/bin/activate
           pip install build wheel setuptools
-          python setup.py bdist_wheel --plat-name=macosx_arm64
+          python setup.py bdist_wheel --plat-name=linux_x86_64
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v3
@@ -31,7 +31,7 @@ jobs:
 
   test:
     needs: build
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Download wheel artifact
         uses: actions/download-artifact@v3

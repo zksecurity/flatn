@@ -13,11 +13,13 @@ def build_binary():
         subprocess.run(['make', 'flatter-darwin', 'libflatter.dylib'])
 
         # clean
-        print(os.getcwd())
         root = os.path.join(os.getcwd(), PACKAGE)
         assert os.path.exists(root)
         binary = os.path.join(root, 'bin')
-        shutil.rmtree(binary)
+        try:
+            shutil.rmtree(binary)
+        except FileNotFoundError:
+            pass
         os.mkdir(binary)
 
         # copy flatter to PACKAGE/bin
@@ -33,7 +35,10 @@ def build_binary():
         root = os.path.join(os.getcwd(), PACKAGE)
         assert os.path.exists(root)
         binary = os.path.join(root, 'bin')
-        shutil.rmtree(binary)
+        try:
+            shutil.rmtree(binary)
+        except FileNotFoundError:
+            pass
         os.mkdir(binary)
 
         # copy flatter to PACKAGE/bin

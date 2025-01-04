@@ -29,6 +29,7 @@ $(LIBS)/omp: openmp-19.1.6.src.tar.xz
        && make -j16
 	rm -rf openmp-19.1.6.src
 
+#&& make check \ # todo: takes a while
 $(LIBS)/gmp: gmp-6.3.0.tar.xz
 	rm -rf gmp-6.3.0
 	tar -xf gmp-6.3.0.tar.xz
@@ -36,7 +37,6 @@ $(LIBS)/gmp: gmp-6.3.0.tar.xz
 	cd gmp-6.3.0 \
 	   && ./configure --prefix $(LIBS)/gmp \
 	   && make -j16 \
-	   # && make check \ # todo: takes a while
 	   && make install
 	rm -rf gmp-6.3.0
 

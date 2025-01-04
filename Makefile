@@ -2,18 +2,21 @@ LIBS = $(PWD)/libs
 
 all: flatter libflatter.dylib
 
-# gmp-6.3.0.tar.xz:
-#	wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
-#
-# mpfr-4.2.1.tar.gz:
-#	wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.gz
-#
-# fplll-5.3.2.tar.gz:
-#	wget https://github.com/fplll/fplll/releases/download/5.3.2/fplll-5.3.2.tar.gz
-#
-# flatter.tar.gz:
-#	wget https://github.com/keeganryan/flatter/archive/c2ed0ee94b6d281df7bcbce31ca275197ef9a562.tar.gz
-#	mv c2ed0ee94b6d281df7bcbce31ca275197ef9a562.tar.gz flatter.tar.gz
+gmp-6.3.0.tar.xz:
+	wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+
+mpfr-4.2.1.tar.gz:
+	wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.gz
+
+fplll-5.3.2.tar.gz:
+	wget https://github.com/fplll/fplll/releases/download/5.3.2/fplll-5.3.2.tar.gz
+
+flatter.tar.gz:
+	wget https://github.com/keeganryan/flatter/archive/c2ed0ee94b6d281df7bcbce31ca275197ef9a562.tar.gz
+	mv c2ed0ee94b6d281df7bcbce31ca275197ef9a562.tar.gz flatter.tar.gz
+
+openmp-19.1.6.src.tar.xz:
+	wget https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.6/openmp-19.1.6.src.tar.xz
 
 $(LIBS)/omp: openmp-19.1.6.src.tar.xz
 	rm -rf openmp-19.1.6.src

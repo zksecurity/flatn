@@ -1,5 +1,7 @@
+from pathlib import Path
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
+from setuptools.command.build_ext import build_ext
 
 from wheel.bdist_wheel import bdist_wheel
 
@@ -12,16 +14,17 @@ PACKAGE = 'pyflatter'
 
 class CustomBuildPy(build_py):
     def run(self):
-        # create the /bin directory
-        root = os.path.join(os.getcwd(), PACKAGE)
-        assert os.path.exists(root)
-        binary = os.path.join(root, 'bin')
-        if os.path.exists(binary):
-            shutil.rmtree(binary)
-        os.makedirs(binary)
+        # run the parent class
+        super().run()
 
-        env = os.environ.copy()
-        env['PWD'] = os.getcwd()
+        # Get the build directory
+        build_dir = Path(self.build_lib) / PACKAGE / "bin"
+        build_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create the bin directory in the build location
+        print(os.listdir(os.getcwd()))
+        # env = os.environ.copy()
+        # env['PWD'] = os.getcwd()
 
         # if on MacOS, build the .dylib
         if sys.platform == 'darwin':
@@ -30,12 +33,16 @@ class CustomBuildPy(build_py):
                 'make',
                 'flatter-darwin',
                 'libflatter.dylib'
-            ], env=env).check_returncode()
+            ]).check_returncode()
 
             # copy flatter to PACKAGE/bin
             # copy libflatter.dylib to PACKAGE/bin
-            shutil.copy2('flatter-darwin', binary)
-            shutil.copy2('libflatter.dylib', binary)
+            shutil.copy2('flatter-darwin', build_dir / 'flatter')
+            shutil.copy2('libflatter.dylib', build_dir / 'libflatter.dylib')
+            os.chmod(build_dir / 'flatter', 0o755)
+
+            #print absolute path of the file
+            print(os.path.abspath(build_dir))
 
         # if on Linux, build the .so
         elif sys.platform == 'linux':
@@ -44,12 +51,13 @@ class CustomBuildPy(build_py):
                 'make',
                 'flatter-linux',
                 'libflatter.so'
-            ], env=env).check_returncode()
+            ]).check_returncode()
 
             # copy flatter to PACKAGE/bin
             # copy libflatter.so to PACKAGE/bin
-            shutil.copy2('flatter-linux', binary)
-            shutil.copy2('libflatter.so', binary)
+            shutil.copy2('flatter-linux', build_dir / 'flatter')
+            shutil.copy2('libflatter.so', build_dir / 'libflatter.so')
+            os.chmod(build_dir / 'flatter', 0o755)
 
         else:
             # die
@@ -64,7 +72,8 @@ class CustomBdistWheel(bdist_wheel):
     def get_tag(self):
         # Override platform tag
         python_tag, abi_tag, platform_tag = bdist_wheel.get_tag(self)
-        print(f'platform_tag: {platform_tag}')
+        python_tag = "py3"
+        abi_tag = "none"
         return python_tag, abi_tag, platform_tag
 
 setup(
@@ -74,19 +83,9 @@ setup(
     install_requires=[
         "setuptools",
     ],
+
     zip_safe=False,
-    package_data={
-        PACKAGE: ['bin/*'],
-    },
-    data_files=[
-        ('', [
-            'Makefile',
-            'gmp-6.3.0.tar.xz',
-            'fplll-5.3.2.tar.gz',
-            'mpfr-4.2.1.tar.gz',
-            'flatter.tar.gz'
-        ]),
-    ],
+    package_data={},
     cmdclass={
         'bdist_wheel': CustomBdistWheel,
         'build_py': CustomBuildPy,

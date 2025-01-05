@@ -1,24 +1,18 @@
 import os
 import sys
 import subprocess
-import pkg_resources
+import importlib.resources as pkg_resources
 
 PACKAGE = 'pyflatter'
 
 # get file path
-__path_bin = pkg_resources.resource_filename(PACKAGE, 'bin')
-
-if sys.platform == 'darwin':
-    __path_flatter = os.path.join(__path_bin, 'flatter-darwin')
-    __path_dylib = os.path.join(__path_bin, 'libflatter.dylib')
-elif sys.platform == 'linux':
-    __path_flatter = os.path.join(__path_bin, 'flatter-linux')
-    __path_dylib = os.path.join(__path_bin, 'libflatter.so')
-else:
-    raise NotImplementedError("This build script is only supported on MacOS and Linux")
+with pkg_resources.path(PACKAGE, 'bin') as path_bin:
+    assert os.path.exists(path_bin), f"Path {path_bin} does not exist"
+    __path_flatter = path_bin / 'flatter'
+    __path_dylib = path_bin
 
 # sanity: check if the file exists
-assert os.path.exists(__path_bin), f"Path {__path_bin} does not exist"
+assert os.path.exists(path_bin), f"Path {path_bin} does not exist"
 assert os.path.exists(__path_flatter), f"Path {__path_flatter} does not exist"
 assert os.path.exists(__path_dylib), f"Path {__path_dylib} does not exist"
 
@@ -47,9 +41,7 @@ def flatter(
     The input/output format follows the FPLLL format.
     """
 
-    args = [
-        __path_flatter,
-    ]
+    args = [str(__path_flatter)]
 
     if verbose:
         args.append('-v')
@@ -76,9 +68,9 @@ def flatter(
     # if we are on MacOS add libflatter.dylib to DYLD_LIBRARY_PATH
     env = {}
     if sys.platform == 'darwin':
-        env['DYLD_LIBRARY_PATH'] = __path_dylib
+        env['DYLD_LIBRARY_PATH'] = str(__path_dylib)
     elif sys.platform == 'linux':
-        env['LD_PRELOAD'] = __path_dylib
+        env['LD_PRELOAD'] = str(__path_dylib)
     else:
         raise NotImplementedError("This build script is only supported on MacOS and Linux")
 
@@ -102,24 +94,6 @@ def flatter(
     proc.stdin.close()
 
     # read the output from stdout
-    # Example output:
-    # [[-9 1 -11 10]
-    # [16 -2 -12 2]
-    # [12 23 16 19]
-    # [3 35 -3 -8]
-    # ]
-    #
-    # Another example output:
-    #
-    # [[-1 -1 0 -3 -1 1 2 1]
-    # [-1 2 2 0 1 -1 -3 2]
-    # [-1 0 -2 -3 -1 2 -1 -3]
-    # [1 4 -1 -1 -2 1 0 -1]
-    # [1 -1 2 -4 3 1 -1 -1]
-    # [0 3 2 0 2 4 0 1]
-    # [-2 0 2 1 -1 -3 1 -3]
-    # [3 -1 5 0 -7 1 -2 -2]
-    # ]
     rows = []
     first_line = True
     last_line = False

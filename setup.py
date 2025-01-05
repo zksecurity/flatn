@@ -16,6 +16,7 @@ class CustomBuildPy(build_py):
     def run(self):
         # run the parent class
         super().run()
+        return
 
         # Get the build directory
         build_dir = Path(self.build_lib) / PACKAGE / "bin"
@@ -83,9 +84,12 @@ setup(
     install_requires=[
         "setuptools",
     ],
-
     zip_safe=False,
-    package_data={},
+    package_data={
+        PACKAGE: [
+            'bin/*',
+        ]
+    },
     cmdclass={
         'bdist_wheel': CustomBdistWheel,
         'build_py': CustomBuildPy,

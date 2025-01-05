@@ -9,3 +9,4 @@ build/
 flatter
 flatter-*
 */__pycache__/
+*.DS_Store

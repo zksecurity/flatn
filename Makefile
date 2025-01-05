@@ -104,13 +104,13 @@ flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mp
  	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
 
-wheel-darwin: flatter-darwin libflatter.dylib setup.py pyproject.toml
+build-darwin: flatter-darwin libflatter.dylib setup.py pyproject.toml
+	rm -rf dist
 	rm -rf pyflatter/bin
 	mkdir -p pyflatter/bin
 	cp libflatter.dylib pyflatter/bin
-	cp flatter-darwin pyflatter/bin
+	cp flatter-darwin pyflatter/bin/flatter
 	python -m build
-	cp dist/*.whl .
 
 clean:
 	rm -rf libs
@@ -122,5 +122,6 @@ clean:
 	rm -f libflatter.dylib libflatter.so
 	rm -rf dist
 	rm -rf *.egg-info/
+	rm -rf *.whl
 
 .PHONY: all clean build-darwin

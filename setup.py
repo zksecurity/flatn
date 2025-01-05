@@ -16,7 +16,9 @@ class CustomBuildPy(build_py):
         root = os.path.join(os.getcwd(), PACKAGE)
         assert os.path.exists(root)
         binary = os.path.join(root, 'bin')
-        assert os.path.exists(binary)
+        if os.path.exists(binary):
+            shutil.rmtree(binary)
+        os.makedirs(binary)
 
         env = os.environ.copy()
         env['PWD'] = os.getcwd()

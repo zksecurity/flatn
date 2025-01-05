@@ -26,7 +26,7 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v3
         with:
-          name: wheel
+          name: wheel-arm64-macos
           path: dist/*.whl
 
   test:
@@ -38,7 +38,7 @@ jobs:
       - name: Download wheel artifact
         uses: actions/download-artifact@v3
         with:
-          name: wheel
+          name: wheel-arm64-macos
           path: dist
 
       - name: Test the package

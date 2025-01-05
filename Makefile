@@ -110,7 +110,15 @@ build-darwin: flatter-darwin libflatter.dylib setup.py pyproject.toml
 	mkdir -p pyflatter/bin
 	cp libflatter.dylib pyflatter/bin
 	cp flatter-darwin pyflatter/bin/flatter
-	python -m build
+	python -m build --wheel
+
+build-linux: flatter-linux libflatter.so setup.py pyproject.toml
+	rm -rf dist
+	rm -rf pyflatter/bin
+	mkdir -p pyflatter/bin
+	cp libflatter.so pyflatter/bin
+	cp flatter-linux pyflatter/bin/flatter
+	python -m build --wheel
 
 clean:
 	rm -rf libs

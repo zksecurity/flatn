@@ -1,0 +1,15 @@
+include build/libflatter.dylib
+include build/libflatter.so
+include build/flatter
+include build/flatter-darwin
+include build/flatter-linux
+
+include fplll-5.3.2.tar.gz
+include gmp-6.3.0.tar.xz
+include mpfr-4.2.1.tar.gz
+include openmp-19.1.6.src.tar.xz
+include flatter.tar.gz
+
+include tests/*.py
+include Makefile
+include flad/__init__.py

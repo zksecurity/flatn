@@ -3,7 +3,7 @@ import sys
 import subprocess
 import importlib.resources as pkg_resources
 
-PACKAGE = 'pyflatter'
+PACKAGE = 'flad'
 
 # get file path
 with pkg_resources.path(PACKAGE, 'bin') as path_bin:

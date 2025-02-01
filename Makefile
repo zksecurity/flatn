@@ -60,10 +60,12 @@ $(LIBS)/fplll: fplll-5.3.2.tar.gz $(LIBS)/gmp $(LIBS)/mpfr
 	rm -rf fplll-5.3.2
 
 flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
-	rm -rf flatter-tmp
-	mkdir flatter-tmp
-	tar -xf flatter.tar.gz -C flatter-tmp --strip-components 1
-	cd flatter-tmp \
+	# untar the flatter source code
+	rm -rf flatter
+	mkdir flatter
+	tar -xf flatter.tar.gz --strip-components=1 -C flatter
+	# build the flatter library
+	cd flatter \
 	   && mkdir build \
 	   && cd build \
 	   && CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
@@ -76,60 +78,50 @@ flatter-darwin libflatter.dylib: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS
 			-DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include" \
 	   && make -j
 
-	# copy the binary and the library
-	cp flatter-tmp/build/bin/flatter flatter-darwin
-	cp flatter-tmp/build/lib/libflatter.dylib .
+	# copy the library and the executable to the root directory
+	cp flatter/build/lib/libflatter.dylib .
+	cp flatter/build/bin/flatter flatter-darwin
 
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter-darwin
 
 flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
-	rm -rf flatter-tmp
-	mkdir flatter-tmp
-	tar -xf flatter.tar.gz -C flatter-tmp --strip-components 1
-	cd flatter-tmp \
-	   && mkdir build \
-       && cd build \
-       && CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
-          CMAKE_LIBRARY_PATH=$(LIBS)/gmp/lib:$(LIBS)/mpfr/lib:$(LIBS)/fplll/lib \
-          cmake .. \
-            -DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
-            -DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
-       && make -j
+	rm -rf flatter
+	mkdir flatter
+	tar -xf flatter.tar.gz --strip-components=1 -C flatter
+	# build the flatter library
+	cd flatter \
+		&& mkdir build \
+		&& cd build \
+		&& CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
+		   CMAKE_LIBRARY_PATH=$(LIBS)/gmp/lib:$(LIBS)/mpfr/lib:$(LIBS)/fplll/lib \
+			cmake .. \
+			-DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
+			-DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
+		&& make -j
 
-	# copy the binary and the library
-	cp flatter-tmp/build/bin/flatter flatter-linux
-	cp flatter-tmp/build/lib/libflatter.so .
+	# copy the library and the executable to the root directory
+	cp flatter/build/lib/libflatter.dylib .
+	cp flatter/build/bin/flatter flatter-darwin
 
  	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
 
-build-darwin: flatter-darwin libflatter.dylib setup.py pyproject.toml
-	rm -rf dist
-	rm -rf pyflatter/bin
-	mkdir -p pyflatter/bin
-	cp libflatter.dylib pyflatter/bin
-	cp flatter-darwin pyflatter/bin/flatter
-	python -m build --wheel
+darwin: flatter-darwin libflatter.dylib
+	echo "Darwin Done"
 
-build-linux: flatter-linux libflatter.so setup.py pyproject.toml
-	rm -rf dist
-	rm -rf pyflatter/bin
-	mkdir -p pyflatter/bin
-	cp libflatter.so pyflatter/bin
-	cp flatter-linux pyflatter/bin/flatter
-	python -m build --wheel
+linux: flatter-linux libflatter.so
+	echo "Linux Done"
 
 clean:
 	rm -rf libs
 	rm -rf gmp-6.3.0
 	rm -rf mpfr-4.2.1
 	rm -rf fplll-5.3.2
-	rm -rf flatter-tmp
 	rm -f flatter-darwin flatter-linux
 	rm -f libflatter.dylib libflatter.so
 	rm -rf dist
 	rm -rf *.egg-info/
 	rm -rf *.whl
 
-.PHONY: all clean build-darwin
+.PHONY: all clean darwin linux

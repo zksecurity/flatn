@@ -45,7 +45,7 @@ jobs:
         run: |
           # create a temporary directory to run the tests
           mkdir -p /tmp/tests
-          cp dist/*.whl /tmp/tests
+          cp *.whl /tmp/tests
           cp tests.py /tmp/tests
           cd /tmp/tests
 

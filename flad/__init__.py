@@ -4,9 +4,10 @@ import subprocess
 import importlib.resources as pkg_resources
 
 PACKAGE = 'flad'
+BIN_NAME = 'flatter'
 
 # get file path
-with pkg_resources.path(PACKAGE, 'bin') as path_bin:
+with pkg_resources.path(PACKAGE) as path_bin:
     assert os.path.exists(path_bin), f"Path {path_bin} does not exist"
     __path_flatter = path_bin / 'flatter'
     __path_dylib = path_bin

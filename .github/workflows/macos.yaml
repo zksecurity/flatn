@@ -18,39 +18,14 @@ jobs:
 
       - name: Build wheel
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install build wheel setuptools
-          make build-darwin
+          ./build.sh
+
+      - name: Test the package
+        run: |
+          ./test.sh
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v3
         with:
           name: wheel-arm64-macos
           path: dist/*.whl
-
-  test:
-    needs: build
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Download wheel artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: wheel-arm64-macos
-          path: dist
-
-      - name: Test the package
-        run: |
-          # create a temporary directory to run the tests
-          mkdir -p /tmp/tests
-          cp *.whl /tmp/tests
-          cp tests.py /tmp/tests
-          cd /tmp/tests
-
-          # install the package and run the tests
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install dist/*.whl
-          python ./tests.py

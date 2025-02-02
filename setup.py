@@ -6,6 +6,7 @@ from setuptools.command.install import install
 from wheel.bdist_wheel import bdist_wheel
 
 PACKAGE = 'flad'
+VERSION = '0.1.0'
 MACOS_FILES = [
     ('flatter-darwin', 'flatter'),
     ('libflatter.dylib', 'libflatter.dylib'),
@@ -25,41 +26,29 @@ class CustomBdistWheel(bdist_wheel):
 
     def finalize_options(self):
         super().finalize_options()
+        # Mark this as not a pure python package
         self.root_is_pure = False
-
-    def copy_artifacts(self, files):
-
-        #current working dir
-        print(os.getcwd())
-        print(os.listdir(os.getcwd()))
-        print(self.build_lib)
-        print()
-        for (src, dst) in files:
-            self.copy_file(
-                src,
-                os.path.join(self.build_lib, DIR_DEST, dst)
-            )
-
-    def run(self):
-        print('Running bdist_wheel' * 100)
-        platform = os.uname().sysname
-        if platform == 'Darwin':
-            subprocess.check_call(['make', MACOS_TARGET])
-            self.copy_artifacts(MACOS_FILES)
-        elif platform == 'Linux':
-            subprocess.check_call(['make', LINUX_TARGET])
-            self.copy_artifacts(LINUX_FILES)
-        else:
-            raise ValueError(f'Unssported platform "{platform}"')
-        print('Done ' * 100)
+        # Set the platform tag
+        self.plat_name = 'macosx_11_0_arm64' if os.uname().sysname == 'Darwin' else 'linux_x86_64'
 
 setup(
     name=PACKAGE,
+    version=VERSION,
+    description='Flatter Library Distribution Package',
+    author='Mathias Hall-Andersen',
+    author_email='mathias@hall-andersen.dk',
     packages=find_packages(),
     package_data={
-        PACKAGE: [dst for (_, dst) in MACOS_FILES + LINUX_FILES],
+        PACKAGE: [
+            'flatter',
+            'libflatter.*',
+        ]
+    },
+    exclude_package_data={
+        '': ['*.tar.gz', '*.tar.xz', '*.zip'],
     },
     cmdclass={
         'bdist_wheel': CustomBdistWheel,
     },
+    python_requires='>=3.4',
 )

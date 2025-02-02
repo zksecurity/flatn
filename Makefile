@@ -108,10 +108,8 @@ flatter-linux libflatter.so: flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mp
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
 
 darwin: flatter-darwin libflatter.dylib
-	echo "Darwin Done"
 
 linux: flatter-linux libflatter.so
-	echo "Linux Done"
 
 clean:
 	rm -rf libs
@@ -121,7 +119,10 @@ clean:
 	rm -f flatter-darwin flatter-linux
 	rm -f libflatter.dylib libflatter.so
 	rm -rf dist
+	rm -rf build
 	rm -rf *.egg-info/
 	rm -rf *.whl
+	rm -f flad/flatter*
+	rm -f flad/libflatter*
 
 .PHONY: all clean darwin linux

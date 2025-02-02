@@ -1,20 +1,23 @@
 #!/bin/bash
 
-set -e
+# build the flatter binary and the shared library
+if [ "$(uname)" = "Linux" ]; then
+    make linux
+    cp libflatter.so flad/
+    cp flatter-linux flad/flatter
+    echo "Done"
+elif [ "$(uname)" = "Darwin" ]; then
+    make darwin
+    cp libflatter.dylib flad/
+	cp flatter-darwin flad/flatter
+	echo "Done"
+else
+    echo "Unsupported platform: $(uname)"
+    exit 1
+fi
 
-rm -rf .tmp-venv
-python3 -m venv .tmp-venv
-source .tmp-venv/bin/activate
+# build the wheel
+python -m venv .venv
+source .venv/bin/activate
 pip install build wheel setuptools
 python -m build
-
-rm -rf /tmp/flatn
-mkdir -p /tmp/flatn
-cp dist/* /tmp/flatn
-cp tests.py /tmp/flatn
-cd /tmp/flatn
-ls -l
-python3 -m venv .venv
-source .venv/bin/activate
-pip install *.whl
-python tests.py

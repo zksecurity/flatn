@@ -29,3 +29,5 @@ assert res == [
     [-24, 10, 20, 23, 10],
     [-33, 7, 3, -13, -17]
 ]
+
+print("All tests passed.")

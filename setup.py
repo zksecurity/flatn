@@ -1,8 +1,10 @@
 import os
 import subprocess
-from setuptools import setup, find_packages
+import sys
+from setuptools import setup, find_packages, Extension
 from setuptools.command.build_py import build_py
 from setuptools.command.install import install
+from distutils.command.bdist import bdist
 from wheel.bdist_wheel import bdist_wheel
 
 PACKAGE = 'flad'
@@ -21,15 +23,32 @@ DIR_BUILD = 'build'
 DIR_DEST = PACKAGE
 
 class CustomBdistWheel(bdist_wheel):
-    def initialize_options(self):
-        super().initialize_options()
-
     def finalize_options(self):
         super().finalize_options()
         # Mark this as not a pure python package
         self.root_is_pure = False
-        # Set the platform tag
-        self.plat_name = 'macosx_11_0_arm64' if os.uname().sysname == 'Darwin' else 'linux_x86_64'
+        # This is a platform wheel
+        self.plat_name_supplied = True
+        
+        # Only support Linux and MacOS
+        platform = sys.platform
+        if platform == 'darwin':
+            self.plat_name = 'macosx_11_0_arm64'
+        elif platform.startswith('linux'):
+            self.plat_name = 'linux_x86_64'
+        else:
+            raise ValueError("This package only supports Linux and MacOS platforms")
+
+    def get_tag(self):
+        # Override get_tag to specify platform-specific tags
+        python, abi, plat = super().get_tag()
+        if sys.platform == 'darwin':
+            plat = 'macosx_11_0_arm64'
+        elif sys.platform.startswith('linux'):
+            plat = 'linux_x86_64'
+        else:
+            raise ValueError("This package only supports Linux and MacOS platforms")
+        return python, abi, plat
 
 setup(
     name=PACKAGE,
@@ -51,4 +70,8 @@ setup(
         'bdist_wheel': CustomBdistWheel,
     },
     python_requires='>=3.4',
+    # Indicate this is not a pure Python package by setting ext_modules
+    ext_modules=[],
+    has_ext_modules=lambda: True,
+    platforms=['linux', 'darwin'],
 )

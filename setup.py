@@ -23,6 +23,21 @@ LINUX_TARGET = 'linux'
 DIR_BUILD = 'build'
 DIR_DEST = PACKAGE
 
+def tag():
+    machine = pf.machine()
+    platform = sys.platform
+    if platform == 'darwin':
+        if machine == 'x86_64':
+            return 'macosx_11_0_x86_64'
+        elif machine == 'arm64':
+            return 'macosx_11_0_arm64'
+    elif platform.startswith('linux'):
+        if machine == 'aarch64':
+            return 'linux_aarch64'
+        elif machine == 'x86_64':
+            return 'linux_x86_64'
+    raise ValueError(f"Unsupported machine type: {machine}")
+
 class CustomBdistWheel(bdist_wheel):
     def finalize_options(self):
         super().finalize_options()
@@ -30,34 +45,12 @@ class CustomBdistWheel(bdist_wheel):
         self.root_is_pure = False
         # This is a platform wheel
         self.plat_name_supplied = True
-
-        # Only support Linux and MacOS
-        machine = pf.machine()
-        platform = sys.platform
-        if platform == 'darwin':
-            if machine == 'x86_64':
-                self.plat_name = 'macosx_11_0_x86_64'
-            elif machine == 'arm64':
-                self.plat_name = 'macosx_11_0_arm64'
-        elif platform.startswith('linux'):
-            if machine == 'aarch64':
-                self.plat_name = 'linux_aarch64'
-            elif machine == 'x86_64':
-                self.plat_name = 'linux_x86_64'
-            else:
-                raise ValueError(f"Unsupported machine type: {machine}")
-        else:
-            raise ValueError("This package only supports Linux and MacOS platforms")
+        self.plat_name = tag()
 
     def get_tag(self):
         # Override get_tag to specify platform-specific tags
         python, abi, plat = super().get_tag()
-        if sys.platform == 'darwin':
-            plat = 'macosx_11_0_arm64'
-        elif sys.platform.startswith('linux'):
-            plat = 'linux_x86_64'
-        else:
-            raise ValueError("This package only supports Linux and MacOS platforms")
+        plat = tag()
         return python, abi, plat
 
 setup(

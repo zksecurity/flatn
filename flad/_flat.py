@@ -8,7 +8,7 @@ PACKAGE = 'flad'
 BIN_NAME = 'flatter'
 
 # get file path
-with pkg_resources.path(PACKAGE) as path_bin:
+with pkg_resources.path(PACKAGE, '') as path_bin:
     assert os.path.exists(path_bin), f"Path {path_bin} does not exist"
     __path_flatter = path_bin / 'flatter'
     __path_dylib = path_bin
@@ -94,7 +94,7 @@ def flatter(
 
     The input/output format follows the FPLLL format.
     """
-    
+
     # sanity check: all rows should have the same length
     assert len(lattice) >= 2, "Lattice should have at least 2 rows"
     assert all(len(row) == len(lattice[0]) for row in lattice), \

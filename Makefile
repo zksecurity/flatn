@@ -1,5 +1,4 @@
 LIBS = $(PWD)/libs
-DEPS = $(PWD)/deps
 
 $(LIBS)/omp:
 	rm -rf openmp-19.1.6.src
@@ -73,7 +72,7 @@ flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
 flatter-linux libflatter.so:
 	rm -rf flatter
 	mkdir flatter
-	tar -xf flatter.tar.gz --strip-components=1 -C flatter
+	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
 
 	# build the flatter library
 	cd flatter \

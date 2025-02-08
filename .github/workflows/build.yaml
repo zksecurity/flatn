@@ -100,4 +100,4 @@ jobs:
 
       - name: Show the artifacts
         run: |
-          ls -l dist
+          tree

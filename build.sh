@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # build the flatter binary and the shared library
 if [ "$(uname)" = "Linux" ]; then
     make linux

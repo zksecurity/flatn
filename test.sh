@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 rm -rf test-env
 mkdir -p test-env
 cd test-env

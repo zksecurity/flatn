@@ -1,7 +1,7 @@
 LIBS = $(PWD)/libs
 DEPS = $(PWD)/deps
 
-$(LIBS)/omp: $(DEPS)/libomp-12.0.0.src.tar.xz
+$(LIBS)/omp:
 	rm -rf openmp-19.1.6.src
 	tar -xf deps/openmp-19.1.6.src.tar.xz
 	mkdir -p $(LIBS)
@@ -12,7 +12,7 @@ $(LIBS)/omp: $(DEPS)/libomp-12.0.0.src.tar.xz
 		&& make -j
 	rm -rf openmp-19.1.6.src
 
-$(LIBS)/gmp: $(DEPS)/gmp-6.3.0.tar.xz
+$(LIBS)/gmp:
 	rm -rf gmp-6.3.0
 	tar -xf deps/gmp-6.3.0.tar.xz
 	mkdir -p $(LIBS)
@@ -23,7 +23,7 @@ $(LIBS)/gmp: $(DEPS)/gmp-6.3.0.tar.xz
 		&& make install
 	rm -rf gmp-6.3.0
 
-$(LIBS)/mpfr: $(DEPS)/mpfr-4.2.1.tar.gz $(LIBS)/gmp
+$(LIBS)/mpfr: $(LIBS)/gmp
 	rm -rf mpfr-4.2.1
 	tar -xf deps/mpfr-4.2.1.tar.gz
 	mkdir -p $(LIBS)
@@ -34,7 +34,7 @@ $(LIBS)/mpfr: $(DEPS)/mpfr-4.2.1.tar.gz $(LIBS)/gmp
 		&& make install
 	rm -rf mpfr-4.2.1
 
-$(LIBS)/fplll: $(DEPS)/fplll-5.3.2.tar.gz $(LIBS)/gmp $(LIBS)/mpfr
+$(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 	rm -rf fplll-5.3.2
 	tar -xf deps/fplll-5.3.2.tar.gz
 	cd fplll-5.3.2 \
@@ -44,7 +44,7 @@ $(LIBS)/fplll: $(DEPS)/fplll-5.3.2.tar.gz $(LIBS)/gmp $(LIBS)/mpfr
 		&& make install
 	rm -rf fplll-5.3.2
 
-flatter-darwin libflatter.dylib: $(DEPS)/flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
+flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
 	# untar the flatter source code
 	rm -rf flatter
 	mkdir flatter
@@ -70,7 +70,7 @@ flatter-darwin libflatter.dylib: $(DEPS)/flatter.tar.gz $(LIBS)/fplll $(LIBS)/gm
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter-darwin
 
-flatter-linux libflatter.so: $(DEPS)/flatter.tar.gz $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
+flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	rm -rf flatter
 	mkdir flatter
 	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter

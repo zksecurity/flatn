@@ -1,0 +1,80 @@
+name: Build Wheels
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential wget m4 xz-utils make cmake libomp-dev libeigen3-dev
+
+      - name: Build wheel
+        run: |
+          ./build.sh
+
+      - name: Test the package
+        run: |
+          ./test.sh
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-amd64-linux
+          path: dist/*.whl
+
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential wget m4 xz-utils make cmake libomp-dev libeigen3-dev
+          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Build wheel
+        run: |
+          ./build.sh
+
+      - name: Test the package
+        run: |
+          ./test.sh
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-arm64-linux
+          path: dist/*.whl
+
+  build-darwin-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew install make wget cmake
+          brew install libomp
+          brew install eigen
+
+      - name: Build wheel
+        run: |
+          ./build.sh
+
+      - name: Test the package
+        run: |
+          ./test.sh
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-arm64-darwin
+          path: dist/*.whl

@@ -13,7 +13,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential wget m4 xz-utils make cmake libomp-dev libeigen3-dev
+          sudo apt install -y \
+            build-essential wget m4 xz-utils \
+            make cmake libomp-dev libeigen3-dev \
+            libgmp-dev libmpfr-dev fplll-tools libfplll-dev libeigen3-dev libopenblas-dev
 
       - name: Build wheel
         run: |
@@ -36,9 +39,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y build-essential wget m4 xz-utils make cmake libomp-dev libeigen3-dev
-          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt update -y
+          sudo apt install -y \
+            build-essential wget m4 xz-utils \
+            make cmake libomp-dev libeigen3-dev \
+            libgmp-dev libmpfr-dev fplll-tools libfplll-dev libeigen3-dev libopenblas-dev
 
       - name: Build wheel
         run: |
@@ -84,20 +89,46 @@ jobs:
       - build-linux-amd64
       - build-linux-arm64
       - build-darwin-arm64
+
     runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/master'
+
+    permissions:
+      contents: write
+      id-token: write
+
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: wheel-amd64-linux
+          path: dist/
 
       - uses: actions/download-artifact@v4
         with:
           name: wheel-arm64-linux
+          path: dist/
 
       - uses: actions/download-artifact@v4
         with:
           name: wheel-arm64-darwin
+          path: dist/
 
       - name: Show the artifacts
         run: |
           tree
+
+      - name: Sign the dists with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: >-
+            ./dist/*.tar.gz
+            ./dist/*.whl
+
+      - name: Upload artifact signatures to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          gh release upload
+          "$GITHUB_REF_NAME" dist/**
+          --repo "$GITHUB_REPOSITORY"

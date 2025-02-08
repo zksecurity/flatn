@@ -92,19 +92,16 @@ flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
 
-flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
+flatter-linux libflatter.so:
 	rm -rf flatter
 	mkdir flatter
 	tar -xf flatter.tar.gz --strip-components=1 -C flatter
+
 	# build the flatter library
 	cd flatter \
 		&& mkdir build \
 		&& cd build \
-		&& CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
-		   CMAKE_LIBRARY_PATH=$(LIBS)/gmp/lib:$(LIBS)/mpfr/lib:$(LIBS)/fplll/lib \
-			cmake .. \
-			-DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
-			-DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include -fopenmp" \
+		&& cmake .. \
 		&& make -j
 
 	# copy the library and the executable to the root directory

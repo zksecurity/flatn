@@ -1,5 +1,6 @@
 import os
 import subprocess
+import platform as pf
 import sys
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_py import build_py
@@ -29,13 +30,22 @@ class CustomBdistWheel(bdist_wheel):
         self.root_is_pure = False
         # This is a platform wheel
         self.plat_name_supplied = True
-        
+
         # Only support Linux and MacOS
+        machine = pf.machine()
         platform = sys.platform
         if platform == 'darwin':
-            self.plat_name = 'macosx_11_0_arm64'
+            if machine == 'x86_64':
+                self.plat_name = 'macosx_11_0_x86_64'
+            elif machine == 'arm64':
+                self.plat_name = 'macosx_11_0_arm64'
         elif platform.startswith('linux'):
-            self.plat_name = 'linux_x86_64'
+            if machine == 'aarch64':
+                self.plat_name = 'linux_aarch64'
+            elif machine == 'x86_64':
+                self.plat_name = 'linux_x86_64'
+            else:
+                raise ValueError(f"Unsupported machine type: {machine}")
         else:
             raise ValueError("This package only supports Linux and MacOS platforms")
 

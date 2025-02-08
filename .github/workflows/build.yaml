@@ -114,15 +114,17 @@ jobs:
           name: wheel-arm64-darwin
           path: dist/
 
-      - name: Show the artifacts
-        run: |
-          tree
-
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
           inputs: >-
             ./dist/*.whl
+
+      - name: Create release if one doesn't exist
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --notes "Release $GITHUB_REF_NAME" || true
 
       - name: Upload artifact signatures to GitHub Release
         env:

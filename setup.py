@@ -41,17 +41,13 @@ def tag():
 class CustomBdistWheel(bdist_wheel):
     def finalize_options(self):
         super().finalize_options()
-        # Mark this as not a pure python package
         self.root_is_pure = False
-        # This is a platform wheel
         self.plat_name_supplied = True
         self.plat_name = tag()
 
     def get_tag(self):
-        # Override get_tag to specify platform-specific tags
-        python, abi, plat = super().get_tag()
-        plat = tag()
-        return python, abi, plat
+        python, abi, _plat = super().get_tag()
+        return python, abi, tag()
 
 setup(
     name=PACKAGE,

@@ -103,7 +103,7 @@ clean:
 	rm -rf build
 	rm -rf *.egg-info/
 	rm -rf *.whl
-	rm -f flad/flatter*
-	rm -f flad/libflatter*
+	rm -f flatn/flatter*
+	rm -f flatn/libflatter*
 
 .PHONY: all clean darwin linux

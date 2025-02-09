@@ -1,5 +1,5 @@
 [project]
-name = "flad"
+name = "flatn"
 version = "0.1.0"
 authors = [
     { name = "Mathias Hall-Andersen", email = "mathias@hall-andersen.dk" },

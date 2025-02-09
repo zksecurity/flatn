@@ -1,14 +1,8 @@
-import os
-import subprocess
-import platform as pf
 import sys
-from setuptools import setup, find_packages, Extension
-from setuptools.command.build_py import build_py
-from setuptools.command.install import install
-from distutils.command.bdist import bdist
+import platform as pf
 from wheel.bdist_wheel import bdist_wheel
 
-PACKAGE = 'flad'
+PACKAGE = 'flatn'
 VERSION = '0.1.0'
 MACOS_FILES = [
     ('flatter-darwin', 'flatter'),

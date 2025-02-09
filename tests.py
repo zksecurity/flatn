@@ -1,6 +1,6 @@
-import flad
+import flatn
 
-res = flad.reduce([
+res = flatn.reduce([
     [1, 0, 331, 303],
     [0, 1, 456, 225],
     [0, 0, 628, 0],
@@ -14,7 +14,7 @@ assert res == [
     [3, 35, -3, -8]
 ]
 
-res = flad.reduce([
+res = flatn.reduce([
     [-21, -3, -27, 28, 10],
     [44, 21, 31, -7, -46],
     [-47, -8, 16, 2, 46],

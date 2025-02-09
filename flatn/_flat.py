@@ -4,7 +4,7 @@ import sys
 import subprocess
 import importlib.resources as pkg_resources
 
-PACKAGE = 'flad'
+PACKAGE = 'flatn'
 BIN_NAME = 'flatter'
 
 # get file path

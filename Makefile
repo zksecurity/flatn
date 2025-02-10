@@ -50,8 +50,8 @@ $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 	tar -xf deps/fplll-5.3.2.tar.gz
 	mkdir -p $(LIBS_PATH)
 	cd fplll-5.3.2 \
-		&& ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
-		&& make -j \
+		&& CXXFLAGS="-w" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
+		&& make -j CXXFLAGS="-w" \
 		&& make -j check \
 		&& make install
 	rm -rf fplll-5.3.2

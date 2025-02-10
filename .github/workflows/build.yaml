@@ -67,7 +67,6 @@ jobs:
       - name: Install dependencies
         run: |
           brew install make wget cmake
-          brew install libomp
           brew install eigen
 
       - name: Build wheel

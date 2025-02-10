@@ -86,7 +86,7 @@ flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter-darwin
 
-flatter-linux libflatter.so:
+flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	rm -rf flatter
 	mkdir flatter
 	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
@@ -95,15 +95,22 @@ flatter-linux libflatter.so:
 	cd flatter \
 		&& mkdir build \
 		&& cd build \
-		&& cmake .. -DBUILD_SHARED_LIBS=OFF \
-		&& make -j
+		&& CMAKE_INCLUDE_PATH=$(LIBS_PATH)/gmp/include:$(LIBS_PATH)/mpfr/include:$(LIBS_PATH)/fplll/include:$(LIBS_PATH)/omp/include \
+					CMAKE_LIBRARY_PATH=$(LIBS_PATH)/gmp/lib:$(LIBS_PATH)/mpfr/lib:$(LIBS_PATH)/fplll/lib:$(LIBS_PATH)/omp/lib \
+					cmake .. \
+			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp \
+			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include -static" \
+			-DCMAKE_EXE_LINKER_FLAGS="-static" \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_FIND_LIBRARY_SUFFIXES=".a" \
+		&& make -j LDFLAGS="-static"
 
 	# copy the library and the executable to the root directory
 	cp flatter/build/lib/libflatter.so .
 	cp flatter/build/bin/flatter flatter-linux
 
-		# a quick test
-	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
+	# a quick test
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-linux
 
 darwin: flatter-darwin libflatter.dylib
 

@@ -56,6 +56,15 @@ $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 		&& make install
 	rm -rf fplll-5.5.0
 
+$(LIBS)/openblas:
+	rm -rf OpenBLAS-0.3.29
+	tar -xf deps/OpenBLAS-0.3.29.tar.gz
+	mkdir -p $(LIBS_PATH)
+	cd OpenBLAS-0.3.29 \
+		&& make DYNAMIC_ARCH=1 NO_SHARED=1 USE_THREAD=1 PREFIX=$(LIBS_PATH)/openblas -j \
+		&& make install PREFIX=$(LIBS_PATH)/openblas
+	rm -rf OpenBLAS-0.3.29
+
 flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	# untar the flatter source code
 	rm -rf flatter
@@ -86,31 +95,25 @@ flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter-darwin
 
-flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
+flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openblas
 	rm -rf flatter
 	mkdir flatter
 	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
 
-	# build the flatter library
 	cd flatter \
 		&& mkdir build \
 		&& cd build \
-		&& CMAKE_INCLUDE_PATH=$(LIBS_PATH)/gmp/include:$(LIBS_PATH)/mpfr/include:$(LIBS_PATH)/fplll/include:$(LIBS_PATH)/omp/include \
-					CMAKE_LIBRARY_PATH=$(LIBS_PATH)/gmp/lib:$(LIBS_PATH)/mpfr/lib:$(LIBS_PATH)/fplll/lib:$(LIBS_PATH)/omp/lib \
-					cmake .. \
-			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp \
-			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include -static" \
-			-DCMAKE_EXE_LINKER_FLAGS="-static" \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DCMAKE_FIND_LIBRARY_SUFFIXES=".a" \
-		&& make -j LDFLAGS="-static"
+		&& cmake .. \
+			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp:$(LIBS_PATH)/openblas \
+			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include" \
+			-DBLA_VENDOR=OpenBLAS \
+			-DBLAS_LIBRARIES=$(LIBS_PATH)/openblas/lib/libopenblas.a \
+		&& make -j
 
-	# copy the library and the executable to the root directory
 	cp flatter/build/lib/libflatter.so .
 	cp flatter/build/bin/flatter flatter-linux
 
-	# a quick test
-	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-linux
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_LIBRARY_PATH=. ./flatter-linux
 
 darwin: flatter-darwin libflatter.dylib
 

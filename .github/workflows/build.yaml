@@ -5,8 +5,13 @@ on:
   pull_request:
 
 jobs:
-  build-linux-amd64:
+  build-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
     steps:
       - uses: actions/checkout@v3
 
@@ -16,9 +21,10 @@ jobs:
           sudo apt install -y \
             build-essential wget m4 xz-utils \
             make cmake libomp-dev libeigen3-dev \
-            libgmp-dev libmpfr-dev fplll-tools libfplll-dev libeigen3-dev libopenblas-dev
+            libgmp-dev libmpfr-dev fplll-tools \
+            libfplll-dev libeigen3-dev libopenblas-dev
 
-      - name: Build Wheel
+      - name: Build wheel
         run: |
           ./build.sh
 
@@ -29,45 +35,21 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-amd64-linux
+          name: wheel-${{ matrix.arch }}-linux
           path: dist/*.whl
 
-  build-linux-arm64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          sudo apt update -y
-          sudo apt install -y \
-            build-essential wget m4 xz-utils \
-            make cmake libomp-dev libeigen3-dev \
-            libgmp-dev libmpfr-dev fplll-tools libfplll-dev libeigen3-dev libopenblas-dev
-
-      - name: Build wheel
-        run: |
-          ./build.sh
-
-      - name: Test the Package
-        run: |
-          ./test.sh
-
-      - name: Upload Wheel Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel-arm64-linux
-          path: dist/*.whl
-
-  build-darwin-arm64:
+  build-darwin:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        arch:
+          - arm64
     steps:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
-          brew install make wget cmake
-          brew install eigen
+          brew install make wget cmake eigen
 
       - name: Build wheel
         run: |
@@ -80,16 +62,74 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-arm64-darwin
+          name: wheel-${{ matrix.arch }}-darwin
           path: dist/*.whl
+
+  test-darwin:
+    name: Fresh Install on macOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch:
+          - arm64
+    needs:
+      - build-darwin
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Delete everything except tests.py
+        run: |
+          find . -type f -not -name 'tests.py' -delete
+
+      - name: Download the wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel-${{ matrix.arch }}-darwin
+
+      - name: Run Tests
+        run: |
+          python3 -m venv venv
+          . venv/bin/activate
+          PYTHONPATH= pip install *.whl
+          python3 ../tests.pyts.py
+
+  test-linux:
+    name: Fresh Install on Linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
+    needs:
+      - build-linux
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Delete everything except tests.py
+        run: |
+          find . -type f -not -name 'tests.py' -delete
+
+      - name: Download the wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel-${{ matrix.arch }}-linux
+
+      - name: Run Tests
+        run: |
+          python3 -m venv venv
+          . venv/bin/activate
+          PYTHONPATH= pip install *.whl
+          python3 ../tests.py
 
   collect-artifacts:
     name: Collect Build Artifacts
 
     needs:
-      - build-linux-amd64
-      - build-linux-arm64
-      - build-darwin-arm64
+      - test-linux
+      - test-darwin
 
     runs-on: ubuntu-latest
 

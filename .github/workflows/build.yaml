@@ -92,7 +92,7 @@ jobs:
           python3 -m venv venv
           . venv/bin/activate
           PYTHONPATH= pip install *.whl
-          python3 ../tests.pyts.py
+          python3 tests.py
 
   test-linux:
     name: Fresh Install on Linux
@@ -122,7 +122,7 @@ jobs:
           python3 -m venv venv
           . venv/bin/activate
           PYTHONPATH= pip install *.whl
-          python3 ../tests.py
+          python3 tests.py
 
   collect-artifacts:
     name: Collect Build Artifacts

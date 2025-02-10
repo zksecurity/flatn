@@ -4,7 +4,7 @@ from wheel.bdist_wheel import bdist_wheel
 from setuptools import setup, find_packages
 
 PACKAGE = 'flatn'
-VERSION = '0.1.0'
+VERSION = '0.1.2'
 MACOS_FILES = [
     ('flatter-darwin', 'flatter'),
     ('libflatter.dylib', 'libflatter.dylib'),

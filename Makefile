@@ -46,15 +46,15 @@ $(LIBS)/mpfr: $(LIBS)/gmp
 	rm -rf mpfr-4.2.1
 
 $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
-	rm -rf fplll-5.3.2
-	tar -xf deps/fplll-5.3.2.tar.gz
+	rm -rf fplll-5.5.0.tar.gz
+	tar -xf deps/fplll-5.5.0.tar.gz
 	mkdir -p $(LIBS_PATH)
-	cd fplll-5.3.2 \
+	cd fplll-5.5.0 \
 		&& CXXFLAGS="-w" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
 		&& make -j CXXFLAGS="-w" \
 		&& make -j check \
 		&& make install
-	rm -rf fplll-5.3.2
+	rm -rf fplll-5.5.0
 
 flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	# untar the flatter source code

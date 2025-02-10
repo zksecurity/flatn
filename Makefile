@@ -50,8 +50,8 @@ $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 	tar -xf deps/fplll-5.5.0.tar.gz
 	mkdir -p $(LIBS_PATH)
 	cd fplll-5.5.0 \
-		&& CXXFLAGS="-w" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
-		&& make -j CXXFLAGS="-w" \
+		&& CXXFLAGS="-w -Wno-overloaded-virtual" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
+		&& make -j CXXFLAGS="-w -Wno-overloaded-virtual" \
 		&& make -j check \
 		&& make install
 	rm -rf fplll-5.5.0
@@ -74,7 +74,7 @@ flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/
             -DOpenMP_CXX_LIB_NAMES="omp" \
             -DOpenMP_omp_LIBRARY="$(LIBS_PATH)/omp/lib/libomp.a" \
             -DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp \
-            -DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include" \
+            -DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include -Wno-overloaded-virtual -Wno-error=overloaded-virtual" \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_FIND_LIBRARY_SUFFIXES=".a;.dylib" \
         && make -j

@@ -1,22 +1,34 @@
-LIBS = $(PWD)/libs
+LIBS = libs
+LIBS_PATH = $(PWD)/$(LIBS)
+DEPS = deps
 
 $(LIBS)/omp:
-	rm -rf openmp-19.1.6.src
-	tar -xf deps/openmp-19.1.6.src.tar.xz
-	mkdir -p $(LIBS)
-	cd openmp-19.1.6.src \
-		&& mkdir build \
-		&& cd build \
-		&& cmake .. \
-		&& make -j
-	rm -rf openmp-19.1.6.src
+	rm -rf _omp_build
+	mkdir -p _omp_build
+	cd _omp_build \
+		&& tar -xf ../deps/openmp-19.1.7.src.tar.xz \
+		&& tar -xf ../deps/cmake-19.1.7.src.tar.xz \
+		&& mkdir -p $(LIBS_PATH) \
+		&& mv openmp-19.1.7.src src \
+		&& mv cmake-19.1.7.src cmake \
+		&& mkdir -p build/static \
+		&& cd build/static \
+		&& cmake ../../src \
+			-DLIBOMP_ENABLE_SHARED=OFF \
+			-DLIBOMP_INSTALL_ALIASES=OFF \
+			-DOPENMP_ENABLE_LIBOMPTARGET=OFF \
+			-DCMAKE_INSTALL_PREFIX=$(LIBS_PATH)/omp \
+			-DCMAKE_BINARY_DIR=$(LIBS_PATH)/omp \
+		&& make -j \
+		&& make install
+	rm -rf _omp_build
 
 $(LIBS)/gmp:
 	rm -rf gmp-6.3.0
 	tar -xf deps/gmp-6.3.0.tar.xz
-	mkdir -p $(LIBS)
+	mkdir -p $(LIBS_PATH)
 	cd gmp-6.3.0 \
-		&& ./configure --prefix $(LIBS)/gmp \
+		&& ./configure --enable-static --disable-shared --prefix $(LIBS_PATH)/gmp \
 		&& make -j \
 		&& make -j check \
 		&& make install
@@ -25,9 +37,9 @@ $(LIBS)/gmp:
 $(LIBS)/mpfr: $(LIBS)/gmp
 	rm -rf mpfr-4.2.1
 	tar -xf deps/mpfr-4.2.1.tar.gz
-	mkdir -p $(LIBS)
+	mkdir -p $(LIBS_PATH)
 	cd mpfr-4.2.1 \
-		&& ./configure --with-gmp=$(LIBS)/gmp --prefix $(LIBS)/mpfr \
+		&& ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --prefix $(LIBS_PATH)/mpfr \
 		&& make -j \
 		&& make -j check \
 		&& make install
@@ -36,31 +48,36 @@ $(LIBS)/mpfr: $(LIBS)/gmp
 $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 	rm -rf fplll-5.3.2
 	tar -xf deps/fplll-5.3.2.tar.gz
+	mkdir -p $(LIBS_PATH)
 	cd fplll-5.3.2 \
-		&& ./configure --with-gmp=$(LIBS)/gmp --with-mpfr=$(LIBS)/mpfr --prefix $(LIBS)/fplll \
+		&& ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
 		&& make -j \
 		&& make -j check \
 		&& make install
 	rm -rf fplll-5.3.2
 
-flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
+flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	# untar the flatter source code
 	rm -rf flatter
 	mkdir flatter
 	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
+
 	# build the flatter library
 	cd flatter \
-			&& mkdir build \
-			&& cd build \
-			&& CMAKE_INCLUDE_PATH=$(LIBS)/gmp/include:$(LIBS)/mpfr/include:$(LIBS)/fplll/include \
-									CMAKE_LIBRARY_PATH=$(LIBS)/gmp/lib:$(LIBS)/mpfr/lib:$(LIBS)/fplll/lib \
-											cmake .. \
-		-DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include" \
-		-DOpenMP_CXX_LIB_NAMES="omp" \
-		-DOpenMP_omp_LIBRARY="/opt/homebrew/opt/libomp/lib/libomp.dylib" \
-		-DCMAKE_PREFIX_PATH=$(LIBS)/gmp:$(LIBS)/mpfr:$(LIBS)/fplll \
-		-DCMAKE_CXX_FLAGS="-I$(LIBS)/gmp/include -I$(LIBS)/mpfr/include -I$(LIBS)/fplll/include" \
-			&& make -j
+    	&& mkdir build \
+    	&& cd build \
+        && CMAKE_INCLUDE_PATH=$(LIBS_PATH)/gmp/include:$(LIBS_PATH)/mpfr/include:$(LIBS_PATH)/fplll/include:$(LIBS_PATH)/omp/include \
+           CMAKE_LIBRARY_PATH=$(LIBS_PATH)/gmp/lib:$(LIBS_PATH)/mpfr/lib:$(LIBS_PATH)/fplll/lib:$(LIBS_PATH)/omp/lib \
+           cmake .. \
+            -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+            -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp" \
+            -DOpenMP_CXX_LIB_NAMES="omp" \
+            -DOpenMP_omp_LIBRARY="$(LIBS_PATH)/omp/lib/libomp.a" \
+            -DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp \
+            -DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include" \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_FIND_LIBRARY_SUFFIXES=".a;.dylib" \
+        && make -j
 
 	# copy the library and the executable to the root directory
 	cp flatter/build/lib/libflatter.dylib .
@@ -69,7 +86,7 @@ flatter-darwin libflatter.dylib: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | DYLD_LIBRARY_PATH=. ./flatter-darwin
 
-flatter-linux libflatter.so:
+flatter-linux libflatter.so: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	rm -rf flatter
 	mkdir flatter
 	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
@@ -78,14 +95,20 @@ flatter-linux libflatter.so:
 	cd flatter \
 		&& mkdir build \
 		&& cd build \
-		&& cmake .. \
+		&& CMAKE_INCLUDE_PATH=$(LIBS_PATH)/gmp/include:$(LIBS_PATH)/mpfr/include:$(LIBS_PATH)/fplll/include:$(LIBS_PATH)/omp/include \
+		   CMAKE_LIBRARY_PATH=$(LIBS_PATH)/gmp/lib:$(LIBS_PATH)/mpfr/lib:$(LIBS_PATH)/fplll/lib:$(LIBS_PATH)/omp/lib \
+	   	   cmake .. \
+			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp \
+			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include" \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_FIND_LIBRARY_SUFFIXES=".a" \
 		&& make -j
 
 	# copy the library and the executable to the root directory
 	cp flatter/build/lib/libflatter.so .
 	cp flatter/build/bin/flatter flatter-linux
 
- 	# a quick test
+		# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | LD_PRELOAD=. ./flatter-linux
 
 darwin: flatter-darwin libflatter.dylib
@@ -97,6 +120,8 @@ clean:
 	rm -rf gmp-6.3.0
 	rm -rf mpfr-4.2.1
 	rm -rf fplll-5.3.2
+	rm -rf openmp-19.1.7.src
+	rm -rf cmake-19.1.7.src
 	rm -f flatter-darwin flatter-linux
 	rm -f libflatter.dylib libflatter.so
 	rm -rf dist

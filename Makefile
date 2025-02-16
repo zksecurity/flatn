@@ -1,6 +1,6 @@
+DEPS = deps
 LIBS = libs
 LIBS_PATH = $(PWD)/$(LIBS)
-DEPS = deps
 
 $(LIBS)/omp:
 	rm -rf _omp_build
@@ -113,6 +113,9 @@ flatter-darwin: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 		-lpthread -ldl -lm \
 		-Xpreprocessor -fopenmp
 
+	# clean up
+	rm -rf flatter
+
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-darwin
 
@@ -140,6 +143,7 @@ flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openbl
 			-DBUILD_SHARED_LIBS=OFF \
 			-DGMP_LIBRARIES="$(LIBS_PATH)/gmp/lib/libgmp.a" \
 			-DMPFR_LIBRARIES="$(LIBS_PATH)/mpfr/lib/libmpfr.a" \
+			-DMPFR_INCLUDES="$(LIBS_PATH)/mpfr/include" \
 			-DFPLLL_LIBRARIES="$(LIBS_PATH)/fplll/lib/libfplll.a" \
 			-DCMAKE_CXX_STANDARD_LIBRARIES="-static-libgcc -static-libstdc++" \
 			-DBLAS_ROOT=$(LIBS_PATH)/openblas \
@@ -164,6 +168,9 @@ flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openbl
 		-lpthread -ldl -lm -fopenmp \
 		$(LIBS_PATH)/gmp/lib/libgmp.a
 
+	# clean up
+	rm -rf flatter
+
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-linux
 
@@ -173,11 +180,13 @@ linux: flatter-linux
 
 clean:
 	rm -rf libs
-	rm -rf gmp-6.3.0
-	rm -rf mpfr-4.2.1
-	rm -rf fplll-5.3.2
-	rm -rf openmp-19.1.7.src
-	rm -rf cmake-19.1.7.src
+	rm -rf gmp-*
+	rm -rf mpfr-*
+	rm -rf fplll-*
+	rm -rf openmp-*
+	rm -rf cmake-*
+	rm -rf OpenBLAS-*
+	rm -rf flatter
 	rm -f flatter-darwin flatter-linux
 	rm -f libflatter.dylib libflatter.so
 	rm -rf dist

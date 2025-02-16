@@ -21,8 +21,7 @@ jobs:
           sudo apt update
           sudo apt install -y \
             build-essential wget m4 xz-utils \
-            make cmake libeigen3-dev \
-            liblapack-dev libopenblas-dev
+            make cmake libeigen3-dev
 
       - name: Build wheel
         run: |
@@ -38,6 +37,12 @@ jobs:
         with:
           name: wheel-${{ matrix.arch }}-linux
           path: dist/*.whl
+
+      - name: Upload flatter binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatter-${{ matrix.arch }}-linux
+          path: flatter-linux
 
   build-darwin:
     runs-on: macos-latest
@@ -65,6 +70,12 @@ jobs:
         with:
           name: wheel-${{ matrix.arch }}-darwin
           path: dist/*.whl
+
+      - name: Upload flatter binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatter-${{ matrix.arch }}-darwin
+          path: flatter-darwin
 
   test-darwin:
     name: Fresh Install on macOS

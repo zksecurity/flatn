@@ -1,6 +1,5 @@
 
 import os
-import sys
 import subprocess
 import importlib.resources as pkg_resources
 
@@ -10,13 +9,11 @@ BIN_NAME = 'flatter'
 # get file path
 with pkg_resources.path(PACKAGE, '') as path_bin:
     assert os.path.exists(path_bin), f"Path {path_bin} does not exist"
-    __path_flatter = path_bin / 'flatter'
-    __path_dylib = path_bin
+    __path_flatter = path_bin / BIN_NAME
 
 # sanity: check if the file exists
 assert os.path.exists(path_bin), f"Path {path_bin} does not exist"
 assert os.path.exists(__path_flatter), f"Path {__path_flatter} does not exist"
-assert os.path.exists(__path_dylib), f"Path {__path_dylib} does not exist"
 
 def run_flatter_raw(
     lattice_str: str,
@@ -57,18 +54,8 @@ def run_flatter_raw(
     if logcond:
         args += ['-l', f'{logcond}']
 
-    env = {}
-    if sys.platform == 'darwin':
-        # if we are on MacOS add libflatter.dylib to DYLD_LIBRARY_PATH
-        env['DYLD_LIBRARY_PATH'] = str(__path_dylib)
-    elif sys.platform == 'linux':
-        # if we are on Linux add libflatter.so using LD_PRELOAD
-        env['LD_PRELOAD'] = str(__path_dylib)
-    else:
-        raise NotImplementedError("This build script is only supported on MacOS and Linux")
-
     # Run flatter command and return proc directly
-    return subprocess.run(args, input=lattice_str, text=True, capture_output=True, env=env)
+    return subprocess.run(args, input=lattice_str, text=True, capture_output=True)
 
 def flatter(
     lattice: list[list[int]],

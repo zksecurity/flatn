@@ -5,12 +5,10 @@ set -e
 # build the flatter binary and the shared library
 if [ "$(uname)" = "Linux" ]; then
     make linux
-    cp libflatter.so flatn
     cp flatter-linux flatn/flatter
     echo "Done"
 elif [ "$(uname)" = "Darwin" ]; then
     make darwin
-    cp libflatter.dylib flatn
 	cp flatter-darwin flatn/flatter
 	echo "Done"
 else

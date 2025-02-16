@@ -146,6 +146,8 @@ flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openbl
 			-DMPFR_INCLUDES="$(LIBS_PATH)/mpfr/include" \
 			-DFPLLL_LIBRARIES="$(LIBS_PATH)/fplll/lib/libfplll.a" \
 			-DFPLLL_INCLUDE_DIR="$(LIBS_PATH)/fplll/include" \
+			-DFPLLL_LIBRARY="$(LIBS_PATH)/fplll/lib/libfplll.a" \
+			-DFPLLL_INCLUDE_DIRS="$(LIBS_PATH)/fplll/include" \
 			-DCMAKE_CXX_STANDARD_LIBRARIES="-static-libgcc -static-libstdc++" \
 			-DBLAS_ROOT=$(LIBS_PATH)/openblas \
 			-DLAPACK_ROOT=$(LIBS_PATH)/openblas \

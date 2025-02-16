@@ -67,7 +67,7 @@ $(LIBS)/openblas:
 	mkdir -p $(LIBS_PATH)
 	cd OpenBLAS-0.3.29 \
 		&& make DYNAMIC_ARCH=1 USE_THREAD=1 NO_SHARED=1 FC=gfortran BINARY=64 PREFIX=$(LIBS_PATH)/openblas -j \
-		&& make PREFIX=$(LIBS_PATH)/openblas install
+		&& make NO_SHARED=1 PREFIX=$(LIBS_PATH)/openblas install
 	rm -rf OpenBLAS-0.3.29
 
 flatter-darwin: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp

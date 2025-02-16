@@ -4,7 +4,6 @@ from wheel.bdist_wheel import bdist_wheel
 from setuptools import setup, find_packages
 
 PACKAGE = 'flatn'
-VERSION = '0.2.0'
 
 class CustomBdistWheel(bdist_wheel):
     def finalize_options(self):
@@ -21,7 +20,6 @@ class CustomBdistWheel(bdist_wheel):
 
 setup(
     name=PACKAGE,
-    version=VERSION,
     description='Flatter Library Distribution Package',
     author='Mathias Hall-Andersen',
     author_email='mathias@hall-andersen.dk',

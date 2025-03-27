@@ -1,11 +1,12 @@
 [project]
 name = "flatn"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
     { name = "Mathias Hall-Andersen", email = "mathias@hall-andersen.dk" },
 ]
 description = "A Python wrapper for the flatter LLL-reduction library."
 requires-python = ">=3.8"
+readme = "README.md"
 
 [build-system]
 requires = ["setuptools>=42", "wheel", "build"]

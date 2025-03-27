@@ -57,7 +57,7 @@ def run_flatter_raw(
     # Run flatter command and return proc directly
     return subprocess.run(args, input=lattice_str, text=True, capture_output=True)
 
-def flatter(
+def reduce(
     lattice: list[list[int]],
     verbose: bool = False,
     quiet: bool = False,
@@ -83,11 +83,12 @@ def flatter(
     """
 
     # sanity check: all rows should have the same length
-    assert len(lattice) >= 2, "Lattice should have at least 2 rows"
-    assert all(len(row) == len(lattice[0]) for row in lattice), \
-        "Every row needs the same number of entries"
-    if delta is not None:
-        assert 0.25 <= delta <= 1.0, "Invalid delta"
+    if len(lattice) < 2:
+        raise ValueError("Lattice should have at least 2 rows")
+    if not all(len(row) == len(lattice[0]) for row in lattice):
+        raise ValueError("Every row needs the same number of entries")
+    if delta is not None and not (0.25 <= delta <= 1.0):
+        raise ValueError("Invalid delta")
 
     # Convert lattice to string format
     rows = ['[' + ' '.join(map(str, row)) + ']' for row in lattice]
@@ -131,39 +132,3 @@ def flatter(
     assert len(rows) >= 2, "Lattice should have at least 2 rows"
     assert all(len(row) == len(rows[0]) for row in rows)
     return rows
-
-def reduce(
-    lattice: list[list[int]],
-    alpha: float | None = None,
-    rhf: float | None = None,
-    delta: float | None = None,
-    logcond: float | None = None,
-) -> list[list[int]]:
-    """Performs LLL (Lenstra-Lenstra-Lovász) lattice reduction.
-
-    Args:
-        lattice: A list of lists representing the input lattice basis vectors
-        alpha (float, optional): Reduction quality parameter alpha (higher means more reduced)
-        rhf (float, optional): Target root Hermite factor to achieve
-        delta (float, optional): LLL parameter delta between 0.25 and 1.0 (higher means more reduced)
-        logcond (float, optional): Maximum allowed log of condition number
-
-    Only one of alpha, rhf, or delta should be specified to control reduction quality.
-    Returns the LLL-reduced basis as a list of lists.
-    """
-
-    # sanity check: all rows should have the same length
-    assert len(lattice) >= 2, "Lattice should have at least 2 rows"
-    assert all(len(row) == len(lattice[0]) for row in lattice), \
-        "Every row needs the same number of entries"
-    if delta is not None:
-        assert 0.25 <= delta <= 1.0, "Invalid delta"
-
-    # run flatter
-    return flatter(
-        lattice,
-        alpha=alpha,
-        rhf=rhf,
-        delta=delta,
-        logcond=logcond,
-    )

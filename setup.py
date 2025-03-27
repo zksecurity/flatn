@@ -23,6 +23,8 @@ setup(
     description='Flatter Library Distribution Package',
     author='Mathias Hall-Andersen',
     author_email='mathias@hall-andersen.dk',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     packages=find_packages(),
     package_data={
         PACKAGE: [

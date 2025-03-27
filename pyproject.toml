@@ -1,12 +1,16 @@
 [project]
 name = "flatn"
-version = "0.3.0"
+version = "0.3.1"
 authors = [
     { name = "Mathias Hall-Andersen", email = "mathias@hall-andersen.dk" },
 ]
 description = "A Python wrapper for the flatter LLL-reduction library."
 requires-python = ">=3.8"
 readme = "README.md"
+license = "GPL-3.0"
+
+[project.urls]
+"Homepage" = "https://github.com/zksecurity/flatn"
 
 [build-system]
 requires = ["setuptools>=42", "wheel", "build"]

@@ -11,6 +11,10 @@ elif [ "$(uname)" = "Darwin" ]; then
     make darwin
 	cp flatter-darwin flatn/flatter
 	echo "Done"
+elif [ "$(uname -o 2>/dev/null)" = "Msys" ] || [[ "$(uname)" == MINGW* ]] || [[ "$(uname)" == MSYS* ]]; then
+    make windows
+    cp flatter-windows.exe flatn/flatter.exe
+    echo "Done"
 else
     echo "Unsupported platform: $(uname)"
     exit 1

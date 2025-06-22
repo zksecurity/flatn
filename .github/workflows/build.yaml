@@ -5,28 +5,116 @@ on:
   pull_request:
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       arch:
+  #         - amd64
+  #         - arm64
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install -y \
+  #           build-essential wget m4 xz-utils \
+  #           make cmake libeigen3-dev
+
+  #     - name: Build wheel
+  #       run: |
+  #         ./build.sh
+  #         readelf -d flatter-linux | grep 'NEEDED'
+
+  #     - name: Test the Package
+  #       run: |
+  #         ./test.sh
+
+  #     - name: Upload wheel artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wheel-${{ matrix.arch }}-linux
+  #         path: dist/*.whl
+
+  #     - name: Upload flatter binary
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: flatter-${{ matrix.arch }}-linux
+  #         path: flatter-linux
+
+  # build-darwin:
+  #   runs-on: macos-latest
+  #   strategy:
+  #     matrix:
+  #       arch:
+  #         - arm64
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Install dependencies
+  #       run: |
+  #         brew install make wget cmake eigen
+
+  #     - name: Build wheel
+  #       run: |
+  #         ./build.sh
+
+  #     - name: Test the package
+  #       run: |
+  #         ./test.sh
+
+  #     - name: Upload wheel artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wheel-${{ matrix.arch }}-darwin
+  #         path: dist/*.whl
+
+  #     - name: Upload flatter binary
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: flatter-${{ matrix.arch }}-darwin
+  #         path: flatter-darwin
+
+  build-windows:
+    runs-on: windows-latest
     strategy:
       matrix:
         arch:
-          - amd64
-          - arm64
+          - x86_64
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            build-essential wget m4 xz-utils \
-            make cmake libeigen3-dev
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            make
+            wget
+            tar
+            xz
+            m4
+            cmake
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-eigen3
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-python-pip
+            mingw-w64-ucrt-x86_64-python-build
+            mingw-w64-ucrt-x86_64-python-wheel
+            mingw-w64-ucrt-x86_64-python-setuptools
 
       - name: Build wheel
         run: |
           ./build.sh
-          readelf -d flatter-linux | grep 'NEEDED'
 
       - name: Test the Package
         run: |
@@ -35,62 +123,102 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-${{ matrix.arch }}-linux
+          name: wheel-${{ matrix.arch }}-windows
           path: dist/*.whl
 
       - name: Upload flatter binary
         uses: actions/upload-artifact@v4
         with:
-          name: flatter-${{ matrix.arch }}-linux
-          path: flatter-linux
+          name: flatter-${{ matrix.arch }}-windows
+          path: flatter-windows.exe
 
-  build-darwin:
-    runs-on: macos-latest
+  # test-darwin:
+  #   name: Fresh Install on macOS
+  #   runs-on: macos-latest
+
+  #   strategy:
+  #     matrix:
+  #       arch:
+  #         - arm64
+
+  #   needs:
+  #     - build-darwin
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Delete everything except tests.py
+  #       run: |
+  #         find . -type f -not -name 'tests.py' -delete
+
+  #     - name: Download the wheel artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: wheel-${{ matrix.arch }}-darwin
+
+  #     - name: Run Tests
+  #       run: |
+  #         python3 -m venv venv
+  #         . venv/bin/activate
+  #         PYTHONPATH= pip install *.whl
+  #         python3 tests.py
+
+  # test-linux:
+  #   name: Fresh Install on Linux
+  #   runs-on: ubuntu-latest
+
+  #   strategy:
+  #     matrix:
+  #       arch:
+  #         - amd64
+  #         - arm64
+
+  #   needs:
+  #     - build-linux
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Delete everything except tests.py
+  #       run: |
+  #         find . -type f -not -name 'tests.py' -delete
+
+  #     - name: Download the wheel artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: wheel-${{ matrix.arch }}-linux
+
+  #     - name: Run Tests
+  #       run: |
+  #         python3 -m venv venv
+  #         . venv/bin/activate
+  #         PYTHONPATH= pip install *.whl
+  #         python3 tests.py
+
+  test-windows:
+    name: Fresh Install on Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
     strategy:
       matrix:
         arch:
-          - arm64
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          brew install make wget cmake eigen
-
-      - name: Build wheel
-        run: |
-          ./build.sh
-
-      - name: Test the package
-        run: |
-          ./test.sh
-
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel-${{ matrix.arch }}-darwin
-          path: dist/*.whl
-
-      - name: Upload flatter binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: flatter-${{ matrix.arch }}-darwin
-          path: flatter-darwin
-
-  test-darwin:
-    name: Fresh Install on macOS
-    runs-on: macos-latest
-
-    strategy:
-      matrix:
-        arch:
-          - arm64
+          - x86_64
 
     needs:
-      - build-darwin
+      - build-windows
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-python-pip
 
       - name: Delete everything except tests.py
         run: |
@@ -99,44 +227,12 @@ jobs:
       - name: Download the wheel artifact
         uses: actions/download-artifact@v4
         with:
-          name: wheel-${{ matrix.arch }}-darwin
+          name: wheel-${{ matrix.arch }}-windows
 
       - name: Run Tests
         run: |
           python3 -m venv venv
-          . venv/bin/activate
-          PYTHONPATH= pip install *.whl
-          python3 tests.py
-
-  test-linux:
-    name: Fresh Install on Linux
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        arch:
-          - amd64
-          - arm64
-
-    needs:
-      - build-linux
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Delete everything except tests.py
-        run: |
-          find . -type f -not -name 'tests.py' -delete
-
-      - name: Download the wheel artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: wheel-${{ matrix.arch }}-linux
-
-      - name: Run Tests
-        run: |
-          python3 -m venv venv
-          . venv/bin/activate
+          source venv/bin/activate
           PYTHONPATH= pip install *.whl
           python3 tests.py
 
@@ -144,8 +240,7 @@ jobs:
     name: Collect Build Artifacts
 
     needs:
-      - test-linux
-      - test-darwin
+      - test-windows
 
     runs-on: ubuntu-latest
 
@@ -162,103 +257,103 @@ jobs:
           name: artifacts
           path: dist/
 
-  publish-to-pypi:
-    name: >-
-      Publish to PyPI
+  # publish-to-pypi:
+  #   name: >-
+  #     Publish to PyPI
 
-    needs:
-      - collect-artifacts
+  #   needs:
+  #     - collect-artifacts
 
-    # only publish on tags and only on master branch
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+  #   # only publish on tags and only on master branch
+  #   if: ${{ startsWith(github.ref, 'refs/tags/') }}
 
-    runs-on: ubuntu-latest
+  #   runs-on: ubuntu-latest
 
-    environment:
-      name: pypi
-      url: https://pypi.org/p/flatn
+  #   environment:
+  #     name: pypi
+  #     url: https://pypi.org/p/flatn
 
-    permissions:
-      contents: write
-      id-token: write
+  #   permissions:
+  #     contents: write
+  #     id-token: write
 
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: artifacts
-          path: dist/
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: artifacts
+  #         path: dist/
 
-      - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  #     - name: Publish distribution to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
 
-  github-release:
-    name: Sign & Create Release
+  # github-release:
+  #   name: Sign & Create Release
 
-    needs:
-      - publish-to-pypi
+  #   needs:
+  #     - publish-to-pypi
 
-    runs-on: ubuntu-latest
+  #   runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-      id-token: write
+  #   permissions:
+  #     contents: write
+  #     id-token: write
 
-    steps:
-      - name: Download all the dists
-        uses: actions/download-artifact@v4
-        with:
-          name: artifacts
-          path: dist/
+  #   steps:
+  #     - name: Download all the dists
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: artifacts
+  #         path: dist/
 
-      - name: Sign the distribution with SigStore
-        uses: sigstore/gh-action-sigstore-python@v3.0.0
-        with:
-          inputs: >-
-            ./dist/*.whl
+  #     - name: Sign the distribution with SigStore
+  #       uses: sigstore/gh-action-sigstore-python@v3.0.0
+  #       with:
+  #         inputs: >-
+  #           ./dist/*.whl
 
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create
-          "$GITHUB_REF_NAME"
-          --repo "$GITHUB_REPOSITORY"
-          --notes ""
+  #     - name: Create GitHub Release
+  #       env:
+  #         GITHUB_TOKEN: ${{ github.token }}
+  #       run: >-
+  #         gh release create
+  #         "$GITHUB_REF_NAME"
+  #         --repo "$GITHUB_REPOSITORY"
+  #         --notes ""
 
-      - name: Upload artifact signatures to GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: >-
-          gh release upload
-          "$GITHUB_REF_NAME" dist/**
-          --repo "$GITHUB_REPOSITORY"
+  #     - name: Upload artifact signatures to GitHub Release
+  #       env:
+  #         GITHUB_TOKEN: ${{ github.token }}
+  #       run: >-
+  #         gh release upload
+  #         "$GITHUB_REF_NAME" dist/**
+  #         --repo "$GITHUB_REPOSITORY"
 
-  publish-to-testpypi:
-    name: >-
-      Publish to TestPyPI
+  # publish-to-testpypi:
+  #   name: >-
+  #     Publish to TestPyPI
 
-    needs:
-      - collect-artifacts
+  #   needs:
+  #     - collect-artifacts
 
-    # only test publish on master branch
-    if: github.ref == 'refs/heads/master'
+  #   # only test publish on master branch
+  #   if: github.ref == 'refs/heads/master'
 
-    runs-on: ubuntu-latest
+  #   runs-on: ubuntu-latest
 
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/flatn
+  #   environment:
+  #     name: testpypi
+  #     url: https://test.pypi.org/p/flatn
 
-    permissions:
-      id-token: write
+  #   permissions:
+  #     id-token: write
 
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: artifacts
-          path: dist/
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: artifacts
+  #         path: dist/
 
-      - name: Publish distribution to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
+  #     - name: Publish distribution to TestPyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/

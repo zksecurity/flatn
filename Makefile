@@ -177,9 +177,70 @@ flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openbl
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-linux
 
+flatter-windows: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openblas
+	rm -rf flatter
+	mkdir flatter
+	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
+
+	# Build the flatter library for Windows with MSYS2/MinGW-w64
+	cd flatter \
+		&& rm -rf build \
+		&& mkdir build \
+		&& cd build \
+		&& CXXFLAGS="-fPIC" CFLAGS="-fPIC" cmake .. \
+			-G "MSYS Makefiles" \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DOpenMP_CXX_FLAGS="-fopenmp" \
+			-DOpenMP_CXX_LIB_NAMES="omp" \
+			-DBLA_VENDOR=OpenBLAS \
+			-DBLAS_LIBRARIES=$(LIBS_PATH)/openblas/lib/libopenblas.a \
+			-DLAPACK_LIBRARIES=$(LIBS_PATH)/openblas/lib/libopenblas.a \
+			-DOpenMP_omp_LIBRARY="$(LIBS_PATH)/omp/lib/libomp.a" \
+			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp:$(LIBS_PATH)/openblas \
+			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include -I$(LIBS_PATH)/openblas/include -Wno-overloaded-virtual -Wno-error=overloaded-virtual -fPIC" \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DGMP_LIBRARIES="$(LIBS_PATH)/gmp/lib/libgmp.a" \
+			-DMPFR_LIBRARIES="$(LIBS_PATH)/mpfr/lib/libmpfr.a" \
+			-DMPFR_INCLUDES="$(LIBS_PATH)/mpfr/include" \
+			-DFPLLL_LIBRARIES="$(LIBS_PATH)/fplll/lib/libfplll.a" \
+			-DFPLLL_INCLUDE_DIR="$(LIBS_PATH)/fplll/include" \
+			-DFPLLL_LIBRARY="$(LIBS_PATH)/fplll/lib/libfplll.a" \
+			-DFPLLL_INCLUDE_DIRS="$(LIBS_PATH)/fplll/include" \
+			-DCMAKE_CXX_STANDARD_LIBRARIES="-static-libgcc -static-libstdc++" \
+			-DBLAS_ROOT=$(LIBS_PATH)/openblas \
+			-DLAPACK_ROOT=$(LIBS_PATH)/openblas \
+		&& make VERBOSE=1
+
+	# Create a list of unique object files with full paths
+	cd flatter/build && \
+		find `pwd`/src/CMakeFiles/flatter.dir -name "*.o" | sort -u > obj_files.txt
+
+	# Manual linking step with unique object files
+	$(CXX) \
+		-o flatter-windows.exe \
+		flatter/build/apps/CMakeFiles/flatter_bin.dir/flatter.cpp.o \
+		`cat flatter/build/obj_files.txt` \
+		$(LIBS_PATH)/openblas/lib/libopenblas.a \
+		$(LIBS_PATH)/fplll/lib/libfplll.a \
+		$(LIBS_PATH)/mpfr/lib/libmpfr.a \
+		$(LIBS_PATH)/gmp/lib/libgmp.a \
+		$(LIBS_PATH)/omp/lib/libomp.a \
+		-static-libgcc -static-libstdc++ \
+		-lpthread -lm -fopenmp \
+		$(LIBS_PATH)/gmp/lib/libgmp.a
+
+	# clean up
+	rm -rf flatter
+
+	# a quick test
+	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-windows.exe
+
 darwin: flatter-darwin
 
 linux: flatter-linux
+
+windows: flatter-windows
 
 clean:
 	rm -rf libs
@@ -190,7 +251,7 @@ clean:
 	rm -rf cmake-*
 	rm -rf OpenBLAS-*
 	rm -rf flatter
-	rm -f flatter-darwin flatter-linux
+	rm -f flatter-darwin flatter-linux flatter-windows.exe
 	rm -f libflatter.dylib libflatter.so
 	rm -rf dist
 	rm -rf build
@@ -198,5 +259,6 @@ clean:
 	rm -rf *.whl
 	rm -f flatn/flatter*
 	rm -f flatn/libflatter*
+	rm -f flatn/*.exe
 
-.PHONY: all clean darwin linux
+.PHONY: all clean darwin linux windows

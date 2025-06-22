@@ -44,10 +44,11 @@ $(LIBS)/gmp:
 	cd gmp-6.3.0 \
 		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
 			./configure --enable-static --disable-shared --prefix $(LIBS_PATH)/gmp \
-				--build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32; \
+				--build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 \
+				CFLAGS="-std=gnu17"; \
 		else \
 			./configure --enable-static --disable-shared --prefix $(LIBS_PATH)/gmp \
-				CFLAGS="-fPIC" \
+				CFLAGS="-fPIC -std=gnu17" \
 				ABI=64; \
 		fi \
 		&& make -j \

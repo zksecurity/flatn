@@ -13,15 +13,26 @@ $(LIBS)/omp:
 		&& mv cmake-19.1.7.src cmake \
 		&& mkdir -p build/static \
 		&& cd build/static \
-		&& cmake ../../src \
-			-DLIBOMP_ENABLE_SHARED=OFF \
-			-DLIBOMP_INSTALL_ALIASES=OFF \
-			-DOPENMP_ENABLE_LIBOMPTARGET=OFF \
-			-DCMAKE_INSTALL_PREFIX=$(LIBS_PATH)/omp \
-			-DCMAKE_BINARY_DIR=$(LIBS_PATH)/omp \
-			-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-			-DCMAKE_CXX_FLAGS="-fPIC" \
-			-DCMAKE_C_FLAGS="-fPIC" \
+		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
+			cmake ../../src \
+				-G "MSYS Makefiles" \
+				-DLIBOMP_ENABLE_SHARED=OFF \
+				-DLIBOMP_INSTALL_ALIASES=OFF \
+				-DOPENMP_ENABLE_LIBOMPTARGET=OFF \
+				-DCMAKE_INSTALL_PREFIX=$(LIBS_PATH)/omp \
+				-DCMAKE_BINARY_DIR=$(LIBS_PATH)/omp \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=ON; \
+		else \
+			cmake ../../src \
+				-DLIBOMP_ENABLE_SHARED=OFF \
+				-DLIBOMP_INSTALL_ALIASES=OFF \
+				-DOPENMP_ENABLE_LIBOMPTARGET=OFF \
+				-DCMAKE_INSTALL_PREFIX=$(LIBS_PATH)/omp \
+				-DCMAKE_BINARY_DIR=$(LIBS_PATH)/omp \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+				-DCMAKE_CXX_FLAGS="-fPIC" \
+				-DCMAKE_C_FLAGS="-fPIC"; \
+		fi \
 		&& make -j \
 		&& make install
 	rm -rf _omp_build
@@ -31,9 +42,14 @@ $(LIBS)/gmp:
 	tar -xf deps/gmp-6.3.0.tar.xz
 	mkdir -p $(LIBS_PATH)
 	cd gmp-6.3.0 \
-		&& ./configure --enable-static --disable-shared --prefix $(LIBS_PATH)/gmp \
-			CFLAGS="-fPIC" \
-			ABI=64 \
+		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
+			./configure --enable-static --disable-shared --prefix $(LIBS_PATH)/gmp \
+				--build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32; \
+		else \
+			./configure --enable-static --disable-shared --prefix $(LIBS_PATH)/gmp \
+				CFLAGS="-fPIC" \
+				ABI=64; \
+		fi \
 		&& make -j \
 		&& make -j check \
 		&& make install
@@ -44,7 +60,12 @@ $(LIBS)/mpfr: $(LIBS)/gmp
 	tar -xf deps/mpfr-4.2.1.tar.gz
 	mkdir -p $(LIBS_PATH)
 	cd mpfr-4.2.1 \
-		&& ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --prefix $(LIBS_PATH)/mpfr CFLAGS="-fPIC" \
+		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
+			./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --prefix $(LIBS_PATH)/mpfr \
+				--build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32; \
+		else \
+			./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --prefix $(LIBS_PATH)/mpfr CFLAGS="-fPIC"; \
+		fi \
 		&& make -j \
 		&& make -j check \
 		&& make install
@@ -55,8 +76,17 @@ $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 	tar -xf deps/fplll-5.5.0.tar.gz
 	mkdir -p $(LIBS_PATH)
 	cd fplll-5.5.0 \
-		&& CXXFLAGS="-w -Wno-overloaded-virtual -fPIC" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
-		&& make -j CXXFLAGS="-w -Wno-overloaded-virtual -static -fPIC" \
+		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
+			CXXFLAGS="-w -Wno-overloaded-virtual" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
+				--build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32; \
+		else \
+			CXXFLAGS="-w -Wno-overloaded-virtual -fPIC" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll; \
+		fi \
+		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
+			make -j CXXFLAGS="-w -Wno-overloaded-virtual -static"; \
+		else \
+			make -j CXXFLAGS="-w -Wno-overloaded-virtual -static -fPIC"; \
+		fi \
 		&& make -j check \
 		&& make install
 	rm -rf fplll-5.5.0
@@ -66,7 +96,11 @@ $(LIBS)/openblas:
 	tar -xf deps/OpenBLAS-0.3.29.tar.gz
 	mkdir -p $(LIBS_PATH)
 	cd OpenBLAS-0.3.29 \
-		&& make DYNAMIC_ARCH=1 USE_THREAD=1 NO_SHARED=1 FC=gfortran BINARY=64 PREFIX=$(LIBS_PATH)/openblas -j \
+		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
+			make DYNAMIC_ARCH=1 USE_THREAD=1 NO_SHARED=1 BINARY=64 PREFIX=$(LIBS_PATH)/openblas TARGET=GENERIC -j; \
+		else \
+			make DYNAMIC_ARCH=1 USE_THREAD=1 NO_SHARED=1 FC=gfortran BINARY=64 PREFIX=$(LIBS_PATH)/openblas -j; \
+		fi \
 		&& make NO_SHARED=1 PREFIX=$(LIBS_PATH)/openblas install
 	rm -rf OpenBLAS-0.3.29
 

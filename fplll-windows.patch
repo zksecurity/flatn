@@ -1,0 +1,42 @@
+# Comprehensive Windows compatibility patch for fplll-5.5.0
+# This patch addresses three Windows-specific issues:
+# 1. Disables FPLLL_WITH_GETRUSAGE (not available on Windows)
+# 2. Replaces gettimeofday with mingw_gettimeofday for MinGW compatibility
+# 3. Defines missing mathematical constants (M_PI, M_E, M_LN2) not available on Windows
+
+--- fplll-5.5.0/fplll/defs.h	2024-11-12 10:50:21
++++ fplll-5.5.0-windows-patched/fplll/defs.h	2025-06-24 11:05:32
+@@ -26,11 +26,21 @@
+ #define FPLLL_WITH_DPE
+ #define FPLLL_WITH_ZDOUBLE
+ #define FPLLL_WITH_ZLONG
+-#define FPLLL_WITH_GETRUSAGE
++// #define FPLLL_WITH_GETRUSAGE
+
+ #include <algorithm>
+ #include <climits>
+ #include <cmath>
++
++#ifndef M_PI
++#define M_PI 3.14159265358979323846
++#endif
++#ifndef M_E
++#define M_E 2.71828182845904523536
++#endif
++#ifndef M_LN2
++#define M_LN2 0.693147180559945309417
++#endif
+ #include <cstddef>
+ #include <cstdio>
+ #include <cstdlib>
+--- fplll-5.5.0/fplll/nr/nr_rand.inl	2024-11-12 10:50:21
++++ fplll-5.5.0-windows-patched/fplll/nr/nr_rand.inl	2025-06-24 11:05:24
+@@ -31,7 +31,7 @@
+   {
+     init();
+     struct timeval time;
+-    gettimeofday(&time, NULL);
++    mingw_gettimeofday(&time, NULL);
+     gmp_randseed_ui(gmp_state, (time.tv_sec * 1000) + (time.tv_usec / 1000));
+   }
+   static bool get_initialized() { return initialized; }

@@ -82,8 +82,7 @@ $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 	mkdir -p $(LIBS_PATH)
 	cd fplll-5.5.0 \
 		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
-			sed -i 's/#define FPLLL_WITH_GETRUSAGE/\/\/ #define FPLLL_WITH_GETRUSAGE/' fplll/defs.h; \
-			sed -i 's/gettimeofday(&time, NULL);/mingw_gettimeofday(\&time, NULL);/' fplll/nr/nr_rand.inl; \
+			patch -p1 < ../fplll-windows.patch; \
 		fi \
 		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
 			CXXFLAGS="-w -Wno-overloaded-virtual" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \

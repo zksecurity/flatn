@@ -102,6 +102,7 @@ jobs:
             xz
             m4
             cmake
+            patch
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-toolchain
             mingw-w64-ucrt-x86_64-cmake
@@ -218,7 +219,10 @@ jobs:
         with:
           msystem: UCRT64
           update: true
-          install: mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-python-pip
+          install: >-
+            patch
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-python-pip
 
       - name: Delete everything except tests.py
         run: |

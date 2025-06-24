@@ -85,13 +85,13 @@ $(LIBS)/fplll: $(LIBS)/gmp $(LIBS)/mpfr
 			patch -p1 < ../fplll-windows.patch; \
 		fi \
 		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
-			CXXFLAGS="-w -Wno-overloaded-virtual" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
+			CXXFLAGS="-w -Wno-overloaded-virtual -ftemplate-depth=1024 -ftemplate-backtrace-limit=0" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll \
 				--build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32; \
 		else \
 			CXXFLAGS="-w -Wno-overloaded-virtual -fPIC" ./configure --enable-static --disable-shared --with-gmp=$(LIBS_PATH)/gmp --with-mpfr=$(LIBS_PATH)/mpfr --prefix $(LIBS_PATH)/fplll; \
 		fi \
 		&& if [ "$(shell uname -o 2>/dev/null)" = "Msys" ] || [[ "$(shell uname)" == MINGW* ]] || [[ "$(shell uname)" == MSYS* ]]; then \
-			make -j CXXFLAGS="-w -Wno-overloaded-virtual -static"; \
+			make -j CXXFLAGS="-w -Wno-overloaded-virtual -static -ftemplate-depth=1024 -ftemplate-backtrace-limit=0"; \
 		else \
 			make -j CXXFLAGS="-w -Wno-overloaded-virtual -static -fPIC"; \
 		fi \

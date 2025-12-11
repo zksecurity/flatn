@@ -70,7 +70,16 @@ $(LIBS)/openblas:
 		&& make NO_SHARED=1 PREFIX=$(LIBS_PATH)/openblas install
 	rm -rf OpenBLAS-0.3.29
 
-flatter-darwin: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
+$(LIBS)/eigen:
+	rm -rf eigen-3.4.0
+	tar -xzf deps/eigen-3.4.0.tar.gz
+	mkdir -p $(LIBS_PATH)
+	cd eigen-3.4.0 && mkdir build && cd build \
+		&& cmake .. -DCMAKE_INSTALL_PREFIX=$(LIBS_PATH)/eigen \
+		&& make install
+	rm -rf eigen-3.4.0
+
+flatter-darwin: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/eigen
 	# untar the flatter source code
 	rm -rf flatter
 	mkdir flatter
@@ -87,7 +96,8 @@ flatter-darwin: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 			-DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp" \
 			-DOpenMP_CXX_LIB_NAMES="omp" \
 			-DOpenMP_omp_LIBRARY="$(LIBS_PATH)/omp/lib/libomp.a" \
-			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp \
+			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp:$(LIBS_PATH)/eigen \
+			-DEigen3_DIR=$(LIBS_PATH)/eigen/share/eigen3/cmake \
 			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include -Wno-overloaded-virtual -Wno-error=overloaded-virtual -fPIC" \
 			-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 			-DBUILD_SHARED_LIBS=OFF \
@@ -119,7 +129,7 @@ flatter-darwin: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp
 	# a quick test
 	echo "[[1 0 331 303]\n[0 1 456 225]\n[0 0 628 0]\n[0 0 0 628]]" | ./flatter-darwin
 
-flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openblas
+flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openblas $(LIBS)/eigen
 	rm -rf flatter
 	mkdir flatter
 	tar -xf deps/flatter.tar.gz --strip-components=1 -C flatter
@@ -137,7 +147,8 @@ flatter-linux: $(LIBS)/fplll $(LIBS)/gmp $(LIBS)/mpfr $(LIBS)/omp $(LIBS)/openbl
 			-DBLAS_LIBRARIES=$(LIBS_PATH)/openblas/lib/libopenblas.a \
 			-DLAPACK_LIBRARIES=$(LIBS_PATH)/openblas/lib/libopenblas.a \
 			-DOpenMP_omp_LIBRARY="$(LIBS_PATH)/omp/lib/libomp.a" \
-			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp:$(LIBS_PATH)/openblas \
+			-DCMAKE_PREFIX_PATH=$(LIBS_PATH)/gmp:$(LIBS_PATH)/mpfr:$(LIBS_PATH)/fplll:$(LIBS_PATH)/omp:$(LIBS_PATH)/openblas:$(LIBS_PATH)/eigen \
+			-DEigen3_DIR=$(LIBS_PATH)/eigen/share/eigen3/cmake \
 			-DCMAKE_CXX_FLAGS="-I$(LIBS_PATH)/gmp/include -I$(LIBS_PATH)/mpfr/include -I$(LIBS_PATH)/fplll/include -I$(LIBS_PATH)/omp/include -I$(LIBS_PATH)/openblas/include -Wno-overloaded-virtual -Wno-error=overloaded-virtual -fPIC" \
 			-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 			-DBUILD_SHARED_LIBS=OFF \
@@ -189,6 +200,7 @@ clean:
 	rm -rf openmp-*
 	rm -rf cmake-*
 	rm -rf OpenBLAS-*
+	rm -rf eigen-*
 	rm -rf flatter
 	rm -f flatter-darwin flatter-linux
 	rm -f libflatter.dylib libflatter.so

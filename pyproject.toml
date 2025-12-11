@@ -1,6 +1,6 @@
 [project]
 name = "flatn"
-version = "0.3.2"
+version = "0.3.3"
 authors = [
     { name = "Mathias Hall-Andersen", email = "mathias@hall-andersen.dk" },
 ]

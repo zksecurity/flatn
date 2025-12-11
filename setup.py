@@ -11,12 +11,15 @@ class CustomBdistWheel(bdist_wheel):
         self.root_is_pure = False
 
     def get_tag(self):
-        python, abi, plat = super().get_tag()
+        # Use py3-none tag since we just ship a binary executable
+        # and don't have any Python version or ABI specific code
         if sys.platform == 'darwin':
             plat = f'macosx_11_0_{pf.machine()}'
         elif sys.platform.startswith('linux'):
             plat = f'manylinux1_{pf.machine()}'
-        return python, abi, plat
+        else:
+            _, _, plat = super().get_tag()
+        return 'py3', 'none', plat
 
 setup(
     name=PACKAGE,

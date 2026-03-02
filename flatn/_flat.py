@@ -46,13 +46,13 @@ def run_flatter_raw(
     if quiet:
         args.append('-q')
     if alpha:
-        args += ['-a', f'{alpha}']
+        args += ['-alpha', f'{alpha}']
     if rhf:
-        args += ['-r', f'{rhf}']
+        args += ['-rhf', f'{rhf}']
     if delta:
-        args += ['-d', f'{delta}']
+        args += ['-delta', f'{delta}']
     if logcond:
-        args += ['-l', f'{logcond}']
+        args += ['-logcond', f'{logcond}']
 
     # Run flatter command and return proc directly
     return subprocess.run(args, input=lattice_str, text=True, capture_output=True)
